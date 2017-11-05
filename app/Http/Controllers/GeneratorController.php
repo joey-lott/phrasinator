@@ -22,7 +22,7 @@ class GeneratorController extends Controller
       foreach($quotes as $quote) {
         $image = new TextImage($quote, $request->fontName);
         $image->adjustFontToFillSpace();
-        // $paths = $image->saveImage("{$quote}", $request->fontSize);
+        $paths = $image->saveImage("{$quote}", $request->fontSize);
         // $path1 = "/images/".($paths[0]);
         // $path2 = "/images/".($paths[1]);
         // $output .= "<img src='{$path1}' width='200' height='200' border='1'><img src='{$path2}' width='200' height='200' border='1' style='background-color:black'>";
