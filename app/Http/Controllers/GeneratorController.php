@@ -21,7 +21,7 @@ class GeneratorController extends Controller
       $output = "<html><head><title>phrasinator</title></head><body>";
       foreach($quotes as $quote) {
         $image = new TextImage($quote, $request->fontName);
-        // $image->adjustFontToFillSpace();
+        $image->adjustFontToFillSpace();
         // $paths = $image->saveImage("{$quote}", $request->fontSize);
         // $path1 = "/images/".($paths[0]);
         // $path2 = "/images/".($paths[1]);
