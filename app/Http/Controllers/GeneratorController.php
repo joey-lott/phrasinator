@@ -16,7 +16,7 @@ class GeneratorController extends Controller
     }
 
     public function generate(Request $request) {
-      //ini_set('max_execution_time', 60);
+      ini_set('max_execution_time', 60);
       $quotes = explode("\r\n", $request->quotes);
       $output = "<html><head><title>phrasinator</title></head><body>";
       foreach($quotes as $quote) {
