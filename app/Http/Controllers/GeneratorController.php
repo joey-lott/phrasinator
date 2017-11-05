@@ -19,6 +19,7 @@ class GeneratorController extends Controller
       //ini_set('max_execution_time', 60);
       $quotes = explode("\r\n", $request->quotes);
       $output = "<html><head><title>phrasinator</title></head><body>";
+      dd($output);
       foreach($quotes as $quote) {
         $image = new TextImage($quote, $request->fontName);
         $image->adjustFontToFillSpace();
