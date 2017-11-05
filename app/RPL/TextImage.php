@@ -7,8 +7,8 @@ class TextImage {
   public $text;
   public $defaultFontSize = 400;
   private $fontSize = 400;
-  private $imageWidth = 1500;
-  private $imageHeight = 1500;
+  private $imageWidth = 3000;
+  private $imageHeight = 3000;
   private $verticalSpaceMultiplier = 0.1;
   private $textToPrint; // replace this with $textLines
   private $textLines;
