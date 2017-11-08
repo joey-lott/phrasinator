@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\RPL\TextImage as Image;
+use App\RPL\Color;
 use Illuminate\Support\Facades\Storage;
 
 class TextImageTest extends TestCase
@@ -134,6 +135,33 @@ class TextImageTest extends TestCase
       $image = new Image($text, "knockout.ttf");
       $printText = $image->adjustFontToFillSpace();
       $image->saveImage("test2.png");
+    }
+
+    public function test_can_return_marked_up_words() {
+      $text = "The [[[color=0000FF]]]Rain In Spain Falls Mainly On The Plain";
+      $image = new Image($text, "knockout.ttf");
+      $markup = $image->getMarkedUpWords();
+      $this->assertEquals($markup[0]->word, "The");
+      $this->assertEquals($markup[1]->word, "Rain");
+      $this->assertEquals($markup[1]->color->red, 0);
+      $this->assertEquals($markup[1]->color->green, 0);
+      $this->assertEquals($markup[1]->color->blue, 0xFF);
+    }
+
+    public function test_can_create_a_color_not_used_in_markup_and_not_black_or_white_to_use_as_transparency_color() {
+      $text = "The [[[color=0000FF]]]Rain [[[color=10G24F]]]In [[[color=2H10F2]]]Spain Falls Mainly On The Plain";
+      $image = new Image($text, "knockout.ttf");
+      $color = $image->getTransparencyColor();
+      $test1 = new Color("0000FF");
+      $test2 = new Color("10G24F");
+      $test3 = new Color("2H10F2");
+      $test4 = new Color("000000");
+      $test5 = new Color("FFFFFF");
+      $this->assertNotEquals($color, $test1);
+      $this->assertNotEquals($color, $test2);
+      $this->assertNotEquals($color, $test3);
+      $this->assertNotEquals($color, $test4);
+      $this->assertNotEquals($color, $test5);
     }
 
     // public function test_can_get_calculate_font_size_for_small_words()
