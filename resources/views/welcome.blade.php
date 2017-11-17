@@ -19,6 +19,8 @@
             <option value="KGSecondChancesSketch.ttf">Sketch</option>
             <option value="STENCIL.ttf">Stencil</option>
             <option value="jackport.ttf">Varsity</option>
+            <option value="bringheart.ttf">BringHeart</option>
+            <option value="TheQueen-Regular.ttf">The Queen</option>
           </select>
         </div>
         <div>

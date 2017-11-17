@@ -23,6 +23,9 @@ Route::get('/generate', function () {
 Route::post("/generate", "GeneratorController@generate");
 //Route::get('/authorize', "PinAuthController@getToken");
 
+Route::get('/generate-with-image', "GeneratorController@form");
+
+
 Route::get('/straightoutta', function () {
   return "<html><body><form action='/straightoutta' method='post'>".csrf_field()."outta what? <input type='text' name='outta'><br>move it left? <input type='text' name='moveLeft' value='0'><br><button>MAKE IT</button></body></html>";
 });
@@ -32,6 +35,12 @@ Route::post('/straightoutta', function (Request $request) {
   return "<html><body><img src='".$uris["black"]."' width='280' height='300'><img src='".$uris["white"]."' width='280' height='300' style='background-color:black'></body></html>";
 });
 
+use App\RPL\TextToMarkup;
+Route::get('/test', function() {
+  $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
+  $t2m = new TextToMarkup($phrase);
+  dd($t2m->words);
+});
 
 Auth::routes();
 

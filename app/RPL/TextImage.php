@@ -2,6 +2,7 @@
 namespace App\RPL;
 
 use App\RPL\MarkedUp;
+use App\RPL\TextToMarkup;
 
 class TextImage {
 
@@ -18,24 +19,31 @@ class TextImage {
   private $forcingFont = false;
   private $containsSpecialCharacters = false;
   private $wordDimensions;
+  public $imageResources;
+  public $transparent;
+  private $textToMarkup;
 
-  public function __construct($text, $font) {
+  public function __construct($text, $font, $width = null, $height = null) {
     $this->text = $text;
+    $this->textToMarkup = new TextToMarkup($text);
     $this->font = $font;
+    if(isset($width)) $this->imageWidth = $width;
+    if(isset($height)) $this->imageHeight = $height;
     $this->containsSpecialCharacters = (boolean) strpos($text, ":::");
   }
 
-  public function getMarkedUpWords() {
-    $words = explode(" ", $this->text);
-    $markedUp = [];
-    foreach($words as $word) {
-      $markedUp[] = new MarkedUp($word);
-    }
-    return $markedUp;
-  }
+  // public function getMarkedUpWords() {
+  //   $words = explode(" ", $this->text);
+  //   $markedUp = [];
+  //   foreach($words as $word) {
+  //     $markedUp[] = new MarkedUp($word);
+  //   }
+  //   return $markedUp;
+  // }
 
   public function longestWord() {
-    $words = explode(" ", $this->text);
+    $phrase = $this->textToMarkup->rawPhraseNoMarkup;
+    $words = explode(" ", $phrase);
 
     // Create an associative array in which each word is a key
     // and the values are the lengths of the words
@@ -49,17 +57,10 @@ class TextImage {
 
   // Get just the words, not the markup
   public function getWords() {
-    $markup = $this->getMarkedUpWords();
-    // Extract just the words from the markup
-    $words = [];
-    foreach($markup as $mu) {
-      $words[] = $mu->word;
-    }
-    return $words;
+    return $phrase = $this->textToMarkup->rawWordsNoMarkup;
   }
 
   public function getWordsDimensions() {
-
     $words = $this->getWords();
 
     $dimensions = [];
@@ -98,25 +99,21 @@ class TextImage {
   }
 
   public function arrangeWordsToLinesSpecialCharacters() {
-    $lines = explode(":::", $this->text);
+    $lines = explode(":::", $this->textToMarkup->rawPhraseNoMarkup);
+    // if the last line is blank, remove it
+    if($lines[count($lines) - 1] == "") array_pop($lines);
     for($i = 0; $i < count($lines); $i++) {
       $line = $lines[$i];
-      // Split the line into markup
+
+      // Split the line into words
       $words = explode(" ", $line);
-      $markedUp = [];
-      foreach($words as $word) {
-        $markedUp[] = new MarkedUp($word);
-      }
 
-      // The line without markup to test for width.
-      $noMarkupLine = $this->stringFromArrayOfMarkups($markedUp);
-
-      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $noMarkupLine);
+      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $line);
 
       $width = $box[2] - $box[0];
       $height = $box[1] - $box[5];
 
-      $lines[$i] = ["width" => $width, "height" => $height, "words" => $markedUp];
+      $lines[$i] = ["width" => $width, "height" => $height, "words" => $words];
     }
     $this->textLines = $lines;
     return $lines;
@@ -156,7 +153,7 @@ class TextImage {
     $lineHeight = 0;
 
 //    $words = $this->getWords();
-    $words = $this->getMarkedUpWords();
+    $words = $this->textToMarkup->rawWordsNoMarkup;
     $wordDimensions = $this->getWordsDimensions();
 
     for($i = 0; $i < count($words); $i++) {
@@ -188,7 +185,6 @@ class TextImage {
         }
 
         array_push($lines, ["width" => $lineWidth, "height" => $lineHeight, "words" => $line]);
-
         // Start a new line.
         $line = [];
         $lineWidth = 0;
@@ -237,47 +233,10 @@ class TextImage {
       $this->fontSize = round($this->fontSize);
     }
 
-
     return $this->fontSize;
 
   }
 
-/*  public function fontSize() {
-
-    // This is an expensive method. So don't run it if not necessary.
-    if($this->hasCalculatedFontSize || $this->forcingFont) return;
-
-    $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $this->longestLine());
-    $width = $box[2] - $box[0];
-
-    // Regardless of the width, adjust up or down to make a best
-    // fit horizontally.
-    $multiplier = $this->imageWidth / $width;
-    $this->fontSize *= $multiplier;
-    $this->fontSize = round($this->fontSize);
-
-    // But now, the text may overrun vertically. So test the height.
-    // Calculate the line height of text containing maximum range
-    // This will probably break if text is all uppercase
-    $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "lg");
-    $lineHeight = $box[1] - $box[5];
-
-    // Split the text to lines.
-    $lines = $this->splitToLines();
-
-    $totalHeight = (($lineHeight + $this->verticalSpaceMultiplier) + $lineHeight) * count($lines);
-    if($totalHeight > $this->imageHeight) {
-      dump("font size too big vertically: ".$this->imageHeight." ".$totalHeight);
-      $this->fontSize *= $this->imageHeight / $totalHeight;
-      $this->fontSize = round($this->fontSize);
-    }
-
-
-    $this->hasCalculatedFontSize = true;
-    dump("final font size: ".$this->fontSize);
-    return $this->fontSize;
-  }
-*/
   public function longestLine() {
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
@@ -288,105 +247,30 @@ class TextImage {
       $lineWidth = $line["width"];
       if($lineWidth > $longest) {
         $longest = $lineWidth;
-        $longestLine = $this->stringFromArrayOfMarkups($line["words"]);
+        $longestLine = implode(" ", $line["words"]);
       }
     }
     return $longestLine;
   }
 
-  public function stringFromArrayOfMarkups($markups) {
-      $string = "";
-      foreach($markups as $mu) {
-        // If it's not the first word in the line, include a space.
-        if($string != "") $string .= " ";
-        $string .= $mu->word;
-      }
-      return $string;
-  }
-
-  /*public function splitToLines() {
-dump("split to lines");
-    // Don't run this method if it has already been run (i.e. textToPrint is set)
-    if(isset($this->textToPrint)) return;
-
-    // Does the input text contain special characters? If so, process
-    // it according to special character rules. Otherwise, process it normally.
-    if($this->containsSpecialCharacters) {
-
-      $printText = explode(":::", $this->text);
-
-    }
-    else {
-      $words = explode(" ", $this->text);
-
-      $printText = [];
-
-      // Start with the first word.
-      $currentLine = $words[0];
-      $test = $currentLine;
-
-      // Test each word
-      for($i = 0; $i < count($words); $i++) {
-        $appendValue = ($i + 1< count($words)) ? $words[$i + 1] : "";
-        $test .= " ".$appendValue;
-
-        // Create the bounding box for the test
-        $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $test);
-        $width = $box[2] - $box[0];
-
-        // If the width is greater than the image width, reset the current
-        // line and test.
-        if($width > $this->imageWidth) {
-
-          // Add the current line to the print text.
-          array_push($printText, $currentLine);
-
-          // Reset the current line and test
-          $currentLine = $appendValue;
-
-          $test = $currentLine;
-        }
-        else {
-          // If last word, add current line to print text.
-          if($i == count($words) - 1) {
-            array_push($printText, $currentLine);
-          }
-          else {
-            $currentLine = $test;
-          }
-        }
-      }
-      if($printText == []) $printText = [$this->text];
-
-    }
-    $this->textToPrint = $printText;
-    return $printText;
-  }
-*/
-
-  public function getTransparencyColor() {
+  public function generateNewTransparencyColor() {
     // generate a random color;
     $transparent = new Color();
 
     // verify that the color is not in any of the markup.
-    $markup = $this->getMarkedUpWords();
-    foreach($markup as $mu) {
+    foreach($this->textToMarkup->colors as $color) {
 
       // If the color is already being used in markup,
       // call this method recursively to get a new color.
-      if($mu->color == $transparent) {
-        $transparent = $this->getTransparencyColor();
+      if($color == $transparent) {
+        $transparent = $this->generateNewTransparencyColor();
       }
     }
+    $this->transparent = $transparent;
     return $transparent;
   }
 
-  public function saveImage($name, $forceFontSize = -1) {
-
-    if($forceFontSize != -1) {
-      $this->fontSize = $forceFontSize;
-      $this->forcingFont = true;
-    }
+  public function generateImageResources() {
 
     // First, delete all images in the images folder
     $files = glob(base_path()."/public/images/*");
@@ -396,17 +280,13 @@ dump("split to lines");
       }
     }
 
-    // Set the font size
-//    $this->fontSize();
-
-
     // Create the images and three colors used: black and white for text, red for transparency
     $image = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
     $imageWhite = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
     $black = imagecolorallocate($image, 0, 0, 0);
     $white = imagecolorallocate($image, 255, 255, 255);
     // Not a pure red, but a color unlikely to be
-    $transparencyColor = $this->getTransparencyColor();
+    $transparencyColor = $this->generateNewTransparencyColor();
     $transparent = imagecolorallocate($image, $transparencyColor->red, $transparencyColor->green, $transparencyColor->blue);
 
     // Fill the image with red and set red to transparent
@@ -424,13 +304,17 @@ dump("split to lines");
     $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "lg");
     $lineHeight = $box[1] - $box[5];
 
+    $markedUpCharacterIndex = 0;
+
     foreach($this->textLines as $line) {
       // Join the words of the line together
-      $lineText = $this->stringFromArrayOfMarkups($line["words"]);
+      $lineText = implode(" ", $line["words"]);
+
       // Get the bounding box of the line of text
       $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $lineText);
 
       $lineWidth = $box[2] - $box[0];
+      dump("line width ({$lineText}): {$lineWidth}");
 
       // If first line, calculate y value to vertically center text
       if($currentY == 0) {
@@ -443,43 +327,80 @@ dump("split to lines");
 
       // This is the x position of the first word in the line
       $x = ($this->imageWidth - $lineWidth) / 2;
-
-      // Get the markup
-      $lineMarkup = $line["words"];
+      $startX = $x;
+      // Get the words
+      $lineWords = $line["words"];
 
       // Now, add each individual mark up word
-      for($i = 0; $i < count($lineMarkup); $i++) {
-        $markup = $lineMarkup[$i];
-        $color = $markup->color;
-        $imgColor = imagecolorallocate($image, $color->red, $color->green, $color->blue);
-        $imgColorWhite = $color->isBlack() ? imagecolorallocate($image, 255, 255, 255) : $imgColor;
-        $printText = $markup->word;
+      for($i = 0; $i < count($lineWords); $i++) {
+        $word = $lineWords[$i];
+        $wordChars = preg_split("//u", $word, null, PREG_SPLIT_NO_EMPTY);
+        for($j = 0; $j < count($wordChars); $j++) {
+          $markup = $this->textToMarkup->characters[$markedUpCharacterIndex];
+          $color = $markup->color;
+
+          $imgColor = imagecolorallocate($image, $color->red, $color->green, $color->blue);
+          $imgColorWhite = $color->isBlack() ? imagecolorallocate($image, 255, 255, 255) : $imgColor;
+          $printText = $markup->character;
+
+          imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
+          imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $imgColorWhite, base_path()."/fonts/".$this->font, $printText);
+
+          // Figure out the width of the character
+          $characterBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
+          $characterWidth = $characterBox[2] - $characterBox[0];
+          $x += $characterWidth * (1.038);
+          $markedUpCharacterIndex++;
+        }
+
         // If it's not the last word in the line, add a space after the word
-        if($i < count($lineMarkup) - 1) $printText .= " ";
-        imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
-        imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $imgColorWhite, base_path()."/fonts/".$this->font, $printText);
+        if($i < count($lineWords) - 1) {
+          $printText = " ";
 
-        // Figure out the width of the word
-        $wordBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
+          imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
+          imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $imgColorWhite, base_path()."/fonts/".$this->font, $printText);
 
-        $x += $wordBox[2] - $wordBox[0];
+          // Figure out the width of the character
+          $characterBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
+          $x += $characterBox[2] - $characterBox[0];
+        }
       }
+      dump("printed line width: ".($x - $startX));
       // imagettftext($image, $this->fontSize, 0, $x, $currentY, $black, base_path()."/fonts/".$this->font, $lineText);
       // imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $white, base_path()."/fonts/".$this->font, $lineText);
     }
 
+    $this->imageResources = ["dark" => $image, "light" => $imageWhite];
+
+    return $this->imageResources;
+  }
+
+  public function saveImages($name) {
+
     $fileName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
 
+    $image = $this->imageResources["dark"];
+    $imageWhite = $this->imageResources["light"];
 
     $name = $fileName.".png";
     imagepng($image, base_path()."/public/images/".$name);
-    imagedestroy($image);
+
     // $name and $nameWhite used to be prepended with base_path().
     $nameWhite = "white_".$fileName.".png";
     imagepng($imageWhite, base_path()."/public/images/".$nameWhite);
-    imagedestroy($imageWhite);
+
+    $this->destroyResources();
+
 
     return [$name, $nameWhite];
+  }
+
+  public function destroyResources() {
+    $image = $this->imageResources["dark"];
+    $imageWhite = $this->imageResources["light"];
+
+    imagedestroy($image);
+    imagedestroy($imageWhite);
   }
 
 }
