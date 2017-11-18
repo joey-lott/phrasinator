@@ -82,6 +82,7 @@ class CompositeImage {
     imagepng($compositeImage, base_path()."/public/images/".$name);
 
     $this->destroyResources();
+    imagedestroy($compositeImage);
     return $name;
   }
 
