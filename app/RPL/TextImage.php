@@ -90,7 +90,7 @@ class TextImage {
   }
 
   public function arrangeWordsToLines() {
-    //dump("arrangeWordsToLines");
+    ////dump("arrangeWordsToLines");
     if(strpos($this->text, ":::")) {
       return $this->arrangeWordsToLinesSpecialCharacters();
     }
@@ -100,7 +100,7 @@ class TextImage {
   }
 
   public function arrangeWordsToLinesSpecialCharacters() {
-    //dump("arrangeWordsToLinesSpecialCharacters");
+    ////dump("arrangeWordsToLinesSpecialCharacters");
 
     // Why doing this here? Comment for now...
     // If the word dimensions haven't yet been calculated, do so first.
@@ -125,14 +125,14 @@ class TextImage {
 
       $lines[$i] = ["width" => $width, "height" => $height, "words" => $words];
     }
-    //dump("setting textLines");
-    //dump($lines);
+    ////dump("setting textLines");
+    ////dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function arrangeWordsToLinesGrid() {
-    //dump("arrangeWordsToLinesGrid");
+    ////dump("arrangeWordsToLinesGrid");
     // Get the dimensions of the text in line long line.
     $dimensions = $this->getTotalDimensionsOfTextInOneLine();
 
@@ -216,14 +216,14 @@ class TextImage {
         array_push($lines, ["width" => $lineWidth, "height" => $lineHeight, "words" => $line]);
       }
     }
-    //dump("setting textLines");
-    //dump($lines);
+    ////dump("setting textLines");
+    ////dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function adjustFontToFillSpace() {
-    //dump("adjustFontToFillSpace");
+    ////dump("adjustFontToFillSpace");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -254,7 +254,7 @@ class TextImage {
       $this->fontSize = round($this->fontSize);
     }
 
-//    //dump("adjusted font size: ".$this->fontSize);
+//    ////dump("adjusted font size: ".$this->fontSize);
     // Adjust the word dimensions based on new font size.
     // This may break something.
     $this->getWordsDimensions();
@@ -265,7 +265,7 @@ class TextImage {
   }
 
   public function longestLine() {
-    //dump("longestLine");
+    ////dump("longestLine");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -311,7 +311,7 @@ class TextImage {
   }
 
   public function generateImageResources() {
-    //dump("generateImageResources");
+    ////dump("generateImageResources");
     // First, delete all images in the images folder
     $files = glob(base_path()."/public/images/*");
     foreach($files as $file) {
@@ -335,6 +335,10 @@ class TextImage {
     // Fill the image with red and set red to transparent
     imagefilledrectangle($image, 0, 0, $this->imageWidth, $this->imageHeight, $transparent);
     imagecolortransparent($image, $transparent);
+
+    // Draw upper and lower bounding lines to see the boundaries
+    // imagefilledrectangle($image, 0, 0, $this->imageWidth, 10, $black);
+    // imagefilledrectangle($image, 0, $this->imageHeight - 10, $this->imageWidth, $this->imageHeight, $black);
 
     imagefilledrectangle($imageWhite, 0, 0, $this->imageWidth, $this->imageHeight, $transparent);
     imagecolortransparent($imageWhite, $transparent);
@@ -371,7 +375,7 @@ class TextImage {
         // Commented because no longer vertically centering...adjusting image height instead
         // $totalHeight = ($lineHeight + ($lineHeight * $this->verticalSpaceMultiplier)) * count($this->textLines);
         // $currentY = $lineHeight + (($this->imageHeight - $totalHeight) / 2) - ($lineHeight * $this->verticalSpaceMultiplier * 1.5);
-        $currentY = $lineHeight;
+        $currentY = -$box[5];
       }
       else {
         $eachLineHeight = $this->imageHeight / count($this->textLines);
@@ -453,8 +457,14 @@ class TextImage {
     $image = $this->imageResources["dark"];
     $imageWhite = $this->imageResources["light"];
 
+    //dump("destroying text image resources");
+    //dump($image);
+    //dump($imageWhite);
     imagedestroy($image);
     imagedestroy($imageWhite);
+    //dump("destroyed");
+    //dump($image);
+    //dump($imageWhite);
   }
 
 }

@@ -82,13 +82,21 @@ class CompositeImage {
     imagepng($compositeImage, base_path()."/public/images/".$name);
 
     $this->destroyResources();
+    //dump("destroying composite image resource");
+    //dump($compositeImage);
     imagedestroy($compositeImage);
+    //dump("destroyed");
+    //dump($compositeImage);
     return $name;
   }
 
   public function destroyResources() {
     foreach($this->images as $image) {
+      //dump("destroying inner image resource");
+      //dump($image);
       imagedestroy($image);
+      //dump("destroyed");
+      //dump($image);
     }
   }
 

@@ -17,6 +17,14 @@ class GeneratorController extends Controller
     }
 
     public function generate(Request $request) {
+      // $image = new TextImage($request->phrase, $request->fontName, $width, $heightRemaining);
+      // $image->adjustFontToFillSpace();
+      // $resources = $image->generateImageResources();
+      // $path1 = "/images/".($path1);
+      // $path2 = "/images/".($path2);
+      // // $path2 = "/images/".($paths[1]);
+      // return view("displayimages", ["path1" => $path1, "path2" => $path2]);
+
       $size = $request->size;
       $width = 3000;
       $height = 3000;
