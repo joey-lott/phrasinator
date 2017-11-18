@@ -37,25 +37,18 @@ use App\RPL\TextToMarkup;
 Route::get('/test', function() {
   $font = "knockout.ttf";
   $fontSize = 100;
-  $nBox = imagettfbbox($fontSize, 0, base_path()."/fonts/".$font, "n");
-  $NBox = imagettfbbox($fontSize, 0, base_path()."/fonts/".$font, "N");
-  $gBox = imagettfbbox($fontSize, 0, base_path()."/fonts/".$font, "g");
-  $gNBox = imagettfbbox($fontSize, 0, base_path()."/fonts/".$font, "gN");
-  $nHeight = $nBox[1] - $nBox[5];
-  $NHeight = $NBox[1] - $NBox[5];
-  $gHeight = $gBox[1] - $gBox[5];
-  $gNHeight = $gNBox[1] - $gNBox[5];
+  $image = imagecreatetruecolor(500, 500);
+  $black = imagecolorallocate($image, 0, 0, 0);
+  $red = imagecolorallocate($image, 255, 0, 0);
+  imagefilledrectangle($image, 0, 0, 500, 500, $red);
+  imagecolortransparent($image, $red);
+  header('Content-Type: image/png');
+  imagepng($image);
+  imagedestroy($image);
 
-  $penguinBox = imagettfbbox($fontSize, 0, base_path()."/fonts/".$font, "penguin");
-  $penguinHeight = $penguinBox[1] - $penguinBox[5];
-  dump($penguinBox);
-  dump($gBox);
-  dump($gNBox);
-  dd($penguinHeight." ".$gNHeight." ".$NHeight." ".$gHeight);
-
-  $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
-  $t2m = new TextToMarkup($phrase);
-  dd($t2m->words);
+  // $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
+  // $t2m = new TextToMarkup($phrase);
+  // dd($t2m->words);
 });
 
 Auth::routes();

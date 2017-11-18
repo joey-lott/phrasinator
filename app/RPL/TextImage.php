@@ -396,15 +396,15 @@ class TextImage {
           $imgColorWhite = $color->isBlack() ? imagecolorallocate($image, 255, 255, 255) : $imgColor;
           $printText = $markup->character;
 
-          imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
+          $bBox = imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
           imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $imgColorWhite, base_path()."/fonts/".$this->font, $printText);
 
           // Figure out the width of the character
           $characterBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
           $characterWidth = $characterBox[2] - $characterBox[0];
-//dump($characterBox);
-          $characterSpacing = $characterBox[0];
-          $x += $characterWidth + $characterSpacing;
+
+          $characterSpacing = 0;//$characterBox[0];
+          $x = $bBox[2] + $characterSpacing;
           $markedUpCharacterIndex++;
         }
 
