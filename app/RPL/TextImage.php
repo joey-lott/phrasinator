@@ -90,6 +90,7 @@ class TextImage {
   }
 
   public function arrangeWordsToLines() {
+    //dump("arrangeWordsToLines");
     if(strpos($this->text, ":::")) {
       return $this->arrangeWordsToLinesSpecialCharacters();
     }
@@ -99,9 +100,18 @@ class TextImage {
   }
 
   public function arrangeWordsToLinesSpecialCharacters() {
+    //dump("arrangeWordsToLinesSpecialCharacters");
+
+    // Why doing this here? Comment for now...
+    // If the word dimensions haven't yet been calculated, do so first.
+    // if(!isset($this->wordDimensions)) $this->getWordsDimensions();
+    // $wordDimensions = $this->wordDimensions;
+
     $lines = explode(":::", $this->textToMarkup->rawPhraseNoMarkup);
+
     // if the last line is blank, remove it
     if($lines[count($lines) - 1] == "") array_pop($lines);
+
     for($i = 0; $i < count($lines); $i++) {
       $line = $lines[$i];
 
@@ -115,11 +125,14 @@ class TextImage {
 
       $lines[$i] = ["width" => $width, "height" => $height, "words" => $words];
     }
+    //dump("setting textLines");
+    //dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function arrangeWordsToLinesGrid() {
+    //dump("arrangeWordsToLinesGrid");
     // Get the dimensions of the text in line long line.
     $dimensions = $this->getTotalDimensionsOfTextInOneLine();
 
@@ -152,9 +165,12 @@ class TextImage {
     // Start the height of the line at 0. For each word, we'll determine if it is the max height of the line.
     $lineHeight = 0;
 
-//    $words = $this->getWords();
     $words = $this->textToMarkup->rawWordsNoMarkup;
-    $wordDimensions = $this->getWordsDimensions();
+
+    // If the word dimensions haven't yet been calculated, do so first.
+    if(!isset($this->wordDimensions)) $this->getWordsDimensions();
+    $this->getWordsDimensions();
+    $wordDimensions = $this->wordDimensions;
 
     for($i = 0; $i < count($words); $i++) {
 
@@ -185,9 +201,11 @@ class TextImage {
         }
 
         array_push($lines, ["width" => $lineWidth, "height" => $lineHeight, "words" => $line]);
+
         // Start a new line.
         $line = [];
         $lineWidth = 0;
+        $lineHeight = 0;
         continue;
       }
       array_push($line, $words[$i]);
@@ -198,11 +216,14 @@ class TextImage {
         array_push($lines, ["width" => $lineWidth, "height" => $lineHeight, "words" => $line]);
       }
     }
+    //dump("setting textLines");
+    //dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function adjustFontToFillSpace() {
+    //dump("adjustFontToFillSpace");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -233,11 +254,18 @@ class TextImage {
       $this->fontSize = round($this->fontSize);
     }
 
+//    //dump("adjusted font size: ".$this->fontSize);
+    // Adjust the word dimensions based on new font size.
+    // This may break something.
+    $this->getWordsDimensions();
+    $this->arrangeWordsToLines();
+
     return $this->fontSize;
 
   }
 
   public function longestLine() {
+    //dump("longestLine");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -270,8 +298,20 @@ class TextImage {
     return $transparent;
   }
 
-  public function generateImageResources() {
+  public function getTotalHeight() {
+//    $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "lg");
+//    $lineHeight = $box[1] - $box[5];
+    $gNBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "gN");
+    $gNHeight = $gNBox[1] - $gNBox[5];
+    $height = 0;
+    foreach($this->textLines as $line) {
+      $height += $gNHeight + ($gNHeight * $this->verticalSpaceMultiplier);
+    }
+    return $height;
+  }
 
+  public function generateImageResources() {
+    //dump("generateImageResources");
     // First, delete all images in the images folder
     $files = glob(base_path()."/public/images/*");
     foreach($files as $file) {
@@ -280,12 +320,15 @@ class TextImage {
       }
     }
 
+    // Adjust the height of the image to match the total height of the text
+    $this->imageHeight = $this->getTotalHeight();
+
     // Create the images and three colors used: black and white for text, red for transparency
     $image = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
     $imageWhite = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
     $black = imagecolorallocate($image, 0, 0, 0);
     $white = imagecolorallocate($image, 255, 255, 255);
-    // Not a pure red, but a color unlikely to be
+
     $transparencyColor = $this->generateNewTransparencyColor();
     $transparent = imagecolorallocate($image, $transparencyColor->red, $transparencyColor->green, $transparencyColor->blue);
 
@@ -299,12 +342,16 @@ class TextImage {
     // Write each line of text to the image, centering each
     $currentY = 0;
 
-    // Calculate the line height of text containing maximum range
-    // This will probably break if text is all uppercase
-    $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "lg");
-    $lineHeight = $box[1] - $box[5];
-
     $markedUpCharacterIndex = 0;
+
+    // $nBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "n");
+    // $NBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "N");
+    // $gBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "g");
+    // $gNBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "gN");
+    // $nHeight = $nBox[1] - $nBox[5];
+    // $NHeight = $NBox[1] - $NBox[5];
+    // $gHeight = $gBox[1] - $gBox[5];
+    // $gNHeight = $gNBox[1] - $gNBox[5];
 
     foreach($this->textLines as $line) {
       // Join the words of the line together
@@ -314,20 +361,26 @@ class TextImage {
       $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $lineText);
 
       $lineWidth = $box[2] - $box[0];
-      dump("line width ({$lineText}): {$lineWidth}");
+      $lineHeight = $box[1] - $box[5];
+
+      // Get the average width per character.
+      $widthPerCharacter = $lineWidth / count(preg_split("//u", $lineText, null, PREG_SPLIT_NO_EMPTY));
 
       // If first line, calculate y value to vertically center text
       if($currentY == 0) {
-        $totalHeight = ($lineHeight + ($lineHeight * $this->verticalSpaceMultiplier)) * count($this->textLines);
-        $currentY = $lineHeight + (($this->imageHeight - $totalHeight) / 2) - ($lineHeight * $this->verticalSpaceMultiplier * 1.5);
+        // Commented because no longer vertically centering...adjusting image height instead
+        // $totalHeight = ($lineHeight + ($lineHeight * $this->verticalSpaceMultiplier)) * count($this->textLines);
+        // $currentY = $lineHeight + (($this->imageHeight - $totalHeight) / 2) - ($lineHeight * $this->verticalSpaceMultiplier * 1.5);
+        $currentY = $lineHeight;
       }
       else {
-        $currentY += $lineHeight + $lineHeight * $this->verticalSpaceMultiplier;
+        $eachLineHeight = $this->imageHeight / count($this->textLines);
+        $currentY += $eachLineHeight;
       }
 
       // This is the x position of the first word in the line
       $x = ($this->imageWidth - $lineWidth) / 2;
-      $startX = $x;
+
       // Get the words
       $lineWords = $line["words"];
 
@@ -349,7 +402,9 @@ class TextImage {
           // Figure out the width of the character
           $characterBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
           $characterWidth = $characterBox[2] - $characterBox[0];
-          $x += $characterWidth * (1.038);
+//dump($characterBox);
+          $characterSpacing = $characterBox[0];
+          $x += $characterWidth + $characterSpacing;
           $markedUpCharacterIndex++;
         }
 
@@ -365,7 +420,6 @@ class TextImage {
           $x += $characterBox[2] - $characterBox[0];
         }
       }
-      dump("printed line width: ".($x - $startX));
       // imagettftext($image, $this->fontSize, 0, $x, $currentY, $black, base_path()."/fonts/".$this->font, $lineText);
       // imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $white, base_path()."/fonts/".$this->font, $lineText);
     }

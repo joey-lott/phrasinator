@@ -21,10 +21,10 @@
 
                   <div class="row">
                     <div class="col-md-4">
-                      <a href="/generate-with-image">MAKE CHANGES</a>
+                      <a href="/generate">MAKE CHANGES</a>
                     </div>
                     <div class="col-md-8">
-                      <a href="/generate-with-image?clear=now">START A NEW IMAGE</a>
+                      <a href="/generate?clear=now">START A NEW IMAGE</a>
                     </div>
                   </div>
 

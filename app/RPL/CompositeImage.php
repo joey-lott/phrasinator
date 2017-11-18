@@ -6,12 +6,16 @@ class CompositeImage {
 
   private $imageWidth = 3000;
   private $imageHeight = 3000;
+  private $verticalSpacing = 50;
   private $transparencyColor;
   private $images = [];
 
   public function __construct($width = 3000, $height = 3000) {
     $this->imageWidth = $width;
     $this->imageHeight = $height;
+
+    // Adjust the vertical spacing relative to the height
+    $this->verticalSpacing *= ($height / 3000);
   }
 
   public function fetchFromUrl($url) {
@@ -25,11 +29,10 @@ class CompositeImage {
   }
 
   public function fetchHeightRemaining() {
-    $spacing = 20;
-    $heightRemaining = $this->imageHeight - $spacing;
+    $heightRemaining = $this->imageHeight;
     foreach($this->images as $image) {
         // Subtract the image resource height;
-        $heightRemaining -= (imagesy($image) + $spacing);
+        $heightRemaining -= imagesy($image) + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier));
     }
     return $heightRemaining;
   }
@@ -57,14 +60,22 @@ class CompositeImage {
 
     imagecolortransparent($compositeImage, $transparent);
 
-    $y = 0;
+    $totalHeight = 0;
+
+    foreach($this->images as $image) {
+      $h = imagesy($image);
+      $totalHeight += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
+    }
+    $totalHeight -= $this->verticalSpacing;
+
+    $y = ($this->imageHeight - $totalHeight) / 2;
 
     foreach($this->images as $image) {
       $w = imagesx($image);
       $h = imagesy($image);
       $x = ($this->imageWidth - $w) / 2;
       imagecopy($compositeImage, $image, $x, $y, 0, 0, $w, $h);
-      $y += $h;
+      $y += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
 
     $name = $fileName.".png";
