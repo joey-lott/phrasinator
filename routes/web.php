@@ -40,6 +40,7 @@ Route::get('/test', function() {
   gc_enable();
   gc_collect_cycles();
   dump("memory: ".memory_get_usage());
+  dump("peak memory: ".memory_get_peak_usage());
 
   // $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
   // $t2m = new TextToMarkup($phrase);
