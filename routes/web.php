@@ -35,13 +35,8 @@ Route::post('/straightoutta', function (Request $request) {
 
 use App\RPL\TextToMarkup;
 Route::get('/test', function() {
-  var_dump(get_resources());
-  dump("memory: ".memory_get_usage());
-  gc_enable();
-  gc_collect_cycles();
-  dump("memory: ".memory_get_usage());
-  dump("peak memory: ".memory_get_peak_usage());
 
+dump(phpinfo());
   // $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
   // $t2m = new TextToMarkup($phrase);
   // dd($t2m->words);
