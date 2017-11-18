@@ -35,16 +35,11 @@ Route::post('/straightoutta', function (Request $request) {
 
 use App\RPL\TextToMarkup;
 Route::get('/test', function() {
-  $font = "knockout.ttf";
-  $fontSize = 100;
-  $image = imagecreatetruecolor(500, 500);
-  $black = imagecolorallocate($image, 0, 0, 0);
-  $red = imagecolorallocate($image, 255, 0, 0);
-  imagefilledrectangle($image, 0, 0, 500, 500, $red);
-  imagecolortransparent($image, $red);
-  header('Content-Type: image/png');
-  imagepng($image);
-  imagedestroy($image);
+  var_dump(get_resources());
+  dump("memory: ".memory_get_usage());
+  gc_enable();
+  gc_collect_cycles();
+  dump("memory: ".memory_get_usage());
 
   // $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
   // $t2m = new TextToMarkup($phrase);
