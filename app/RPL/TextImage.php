@@ -421,6 +421,7 @@ class TextImage {
 
           // Figure out the width of the character
           $characterBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $printText);
+          dump($characterBox);
           $x += $characterBox[2] - $characterBox[0];
         }
       }
