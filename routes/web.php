@@ -55,8 +55,8 @@ Route::get('/test', function() {
   foreach($chars as $char) {
     $charResponse = imagettftext($image, $fontSize, 0, $x, $y, $black, "../fonts/".$font, $char);
     $characterBox = imagettfbbox($fontSize, 0, "../fonts/".$font, $char);
-    var_dump($characterBox);
-    var_dump($charResponse);
+    dump($characterBox);
+    dump($charResponse);
     //$characterWidth = $characterBox[2] - $characterBox[0];
     $x = $charResponse[2] + $kerning;
     //var_dump($charResponse[4]);
