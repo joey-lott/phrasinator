@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
-                <div class="panel-heading">Login</div>
+                <div class="panel-heading">Image Settings</div>
 
                 <div class="panel-body">
 
@@ -37,6 +37,13 @@
           </div>
         </div>
 
+        <div>
+          <button class="btn btn-primary">Make Image</button>
+        </div>
+        <div></div>
+
+        <hr>
+
         <div class="row form-group">
           <label class="form-group col-md-2">Line Spacing:</label>
           <div class="col-md-10">
@@ -45,7 +52,16 @@
         </div>
 
         <div class="row form-group">
-          <label class="form-group col-md-2">Image Location:</label>
+          <label class="form-group col-md-2">Text Justification:</label>
+          <div class="col-md-10">
+              <input type="radio" name="textJustification" value="left"<?php if($textJustification == "left") echo " checked";?>> Left
+              <input type="radio" name="textJustification" value="center"<?php if($textJustification == "center") echo " checked";?>> Center
+              <input type="radio" name="textJustification" value="right"<?php if($textJustification == "right") echo " checked";?>> Right
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <label class="form-group col-md-2">Pixabay Image Location:</label>
           <div class="col-md-10">
             <select name="imageLocation" class="form-control">
               <option>none</option>
@@ -75,11 +91,16 @@
           @endif
         </div>
         <div class="row form-group">
-          <label class="form-group col-md-2">Image size:</label>
+          <label class="form-group col-md-2">Total Image Size:</label>
           <div class="col-md-10">
-            <input type="radio" name="size" value="large"<?php if($size == "large") echo " checked";?>> Large
-            <input type="radio" name="size" value="medium"<?php if($size == "medium") echo " checked";?>> Medium
-            <input type="radio" name="size" value="small"<?php if($size == "small") echo " checked";?>> Small
+            <div class="row">
+              <input type="radio" name="size" value="large"<?php if($size == "large") echo " checked";?>> Large
+              <input type="radio" name="size" value="medium"<?php if($size == "medium") echo " checked";?>> Medium
+              <input type="radio" name="size" value="small"<?php if($size == "small") echo " checked";?>> Small
+            </div>
+            <div class="row">
+              (smaller total image size means pixabay images appear larger relative to text)
+            </div>
           </div>
         </div>
         <div>
@@ -131,7 +152,7 @@
       let fileExtension = wfurlParts[1].split(".")[1];
       wfurl = wfurlParts[0]+"_960."+fileExtension;
 
-      $("#images").append("<input type='radio' id='image"+i+"' name='pixabayImage' onchange='imageSelectionChange(this);' value='"+wfurl+"' style='visibility:hidden;position:absolute'><label for='image"+i+"' id='image"+i+"_label'><img src='"+hits[i].previewURL+"'></label>");
+      $("#images").append("<input type='radio' id='image"+i+"' name='pixabayImage' onchange='imageSelectionChange(this);' value='"+wfurl+"' style='visibility:hidden;position:absolute'><label for='image"+i+"' id='image"+i+"_label' style='border: 2px solid transparent'><img src='"+hits[i].previewURL+"'></label>");
     }
   }
 

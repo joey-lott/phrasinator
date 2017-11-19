@@ -19,8 +19,9 @@ class TextImageV2 {
   private $layout;
   // Store the height of one line of text. This gets calculated once. Used many times.
   private $lineHeight;
+  private $textJustification;
 
-  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1) {
+  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1, $textJustification = "center") {
     $this->text = $text;
     $this->font = $font;
     $this->textToMarkup = new TextToMarkup($text, $defaultTextColor);
@@ -29,6 +30,7 @@ class TextImageV2 {
     if(isset($height)) $this->imageHeight = $height;
     $this->containsSpecialCharacters = (boolean) strpos($text, ":::");
     $this->verticalSpaceMultiplier = $lineSpacing;
+    $this->textJustification = $textJustification;
   }
 
   public function getFileName() {
@@ -172,6 +174,13 @@ class TextImageV2 {
 
     $markedUpCharacterIndex = 0;
 
+    // Get the width of the longest line of text to calculate the positions
+    // of text when right or left justified.
+    $longestLine = $this->layout->getLongestLine();
+    $lineImage = $this->createImageResourceForLineOfMarkup($longestLine, 1, $transparent, 1);
+    imagedestroy($lineImage["image"]);
+    $longestLineWidth = $lineImage["width"];
+
     foreach($this->layout->getLines() as $line) {
 
       // Join the characters of the line together
@@ -193,7 +202,16 @@ class TextImageV2 {
       $lineImage = $this->createImageResourceForLineOfMarkup($line, $eachLineHeight, $transparent, $heightAboveBaseline);
 
       // This is the x position of the first word in the line
-      $x = ($this->imageWidth - $lineImage["width"]) / 2;
+      switch($this->textJustification) {
+        case "left":
+          $x = ($this->imageWidth - $longestLineWidth) / 2;
+          break;
+        case "right";
+          $x = $this->imageWidth - (($this->imageWidth - $longestLineWidth) / 2) - $lineImage["width"];
+          break;
+        default:
+          $x = ($this->imageWidth - $lineImage["width"]) / 2;
+      }
 
       imagecopy($image, $lineImage["image"], $x, $currentY, 0, 0, $lineImage["width"], $eachLineHeight);
       imagedestroy($lineImage["image"]);

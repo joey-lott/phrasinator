@@ -44,18 +44,19 @@ class GeneratorController extends Controller
                "size" => $request->size,
                "imageLocation" => $request->imageLocation,
                "imageUrl" => $request->pixabayImage,
-               "lineSpacing" => $request->lineSpacing]);
+               "lineSpacing" => $request->lineSpacing,
+               "textJustification" => $request->textJustification]);
 
-         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_dark", new Color("000000"), $request->lineSpacing);
+         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_dark", new Color("000000"), $request->lineSpacing, $request->textJustification);
          $path1 = "/images/".($path);
-         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_light", new Color("FFFFFF"), $request->lineSpacing);
+         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_light", new Color("FFFFFF"), $request->lineSpacing, $request->textJustification);
          $path2 = "/images/".($path);
 
          return view("displayimages", ["path1" => $path1, "path2" => $path2]);
 
     }
 
-    private function makeComposite($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $fileNameUniqueSuffix, $color, $lineSpacing) {
+    private function makeComposite($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $fileNameUniqueSuffix, $color, $lineSpacing, $textJustification) {
       $composite = new CompositeImage($width, $height);
 
       // If image location was set to above or below (not none), try to grab the image
@@ -78,7 +79,7 @@ class GeneratorController extends Controller
 
 
       // Generate the text image
-      $image = new TextImageV2($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing);
+      $image = new TextImageV2($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
       $image->adjustFontToFillSpace();
       $resource = $image->generateImageResource();
 
@@ -115,10 +116,12 @@ class GeneratorController extends Controller
       $imageLocation = session()->has("imageLocation") ? session()->get("imageLocation") : "";
       $imageUrl = session()->has("imageUrl") ? session()->get("imageUrl") : "";
       $lineSpacing = session()->has("lineSpacing") ? session()->get("lineSpacing") : .1;
+      $textJustification = session()->has("textJustification") ? session()->get("textJustification") : "center";
       return view("formWithImageSelector", ["phrase" => $phrase, "fontName" => $fontName, "size" => $size,
       "imageLocation" => $imageLocation,
       "imageUrl" => $imageUrl,
-      "lineSpacing" => $lineSpacing]);
+      "lineSpacing" => $lineSpacing,
+      "textJustification" => $textJustification]);
     }
 
 }
