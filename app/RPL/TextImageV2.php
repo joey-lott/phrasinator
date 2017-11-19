@@ -9,14 +9,16 @@ class TextImageV2 {
   private $font;
   public $text;
   public $defaultFontSize = 400;
-  private $fontSize = 400;
+  private $fontSize = 40;
   private $imageWidth = 3000;
   private $imageHeight = 3000;
-  private $verticalSpaceMultiplier = 0.1;
+  private $verticalSpaceMultiplier = 0.25;
   public $imageResource;
   public $transparent;
   private $textToMarkup;
   private $layout;
+  // Store the height of one line of text. This gets calculated once. Used many times.
+  private $lineHeight;
 
   public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null) {
     $this->text = $text;
@@ -57,14 +59,29 @@ class TextImageV2 {
       $bBox = imagettftext($image, $this->fontSize, 0, $x, $lineHeight, $imgColor, base_path()."/fonts/".$this->font, $printText);
 
       $x = $bBox[2];
-
       // Get the character height
       $charHeight = $bBox[1] - $bBox[5];
       // If this is the max height, keep track
       if($charHeight > $height) $height = $charHeight;
-
     }
-    return ["image" => $image, "width" => $bBox[2], "height" => $height];
+    return ["image" => $image, "width" => $bBox[2], "height" => $charHeight];
+  }
+
+  private function generateLineWithAllCharacters() {
+    $line = [];
+    $charsString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?,'Ñ";
+    $chars = preg_split("//u", $charsString, null, PREG_SPLIT_NO_EMPTY);
+    foreach($chars as $char) {
+      $line[] = new MarkedUpCharacter($char, null);
+    }
+    return $line;
+  }
+
+  private function calculateLineHeight() {
+    $tallest = $this->generateLineWithAllCharacters();
+    $lineImage = $this->createImageResourceForLineOfMarkup($tallest, 1, null, 1);
+    imagedestroy($lineImage["image"]);
+    $this->lineHeight = $lineImage["height"];
   }
 
   public function adjustFontToFillSpace() {
@@ -74,9 +91,9 @@ class TextImageV2 {
     $lines = $layout->getLines();
 
     $longest = $layout->getLongestLine();
-
     $lineImage = $this->createImageResourceForLineOfMarkup($longest, 1, null, 1);
     imagedestroy($lineImage["image"]);
+
 
     $width = $lineImage["width"];
 
@@ -90,18 +107,20 @@ class TextImageV2 {
     // But now, the text may overrun vertically. So test the height.
     // Calculate the line height of text containing maximum range
     // This will probably break if text is all uppercase
-    $lineImage = $this->createImageResourceForLineOfMarkup($longest, 1, null, 1);
+    $tallest = $this->generateLineWithAllCharacters();
+    $lineImage = $this->createImageResourceForLineOfMarkup($tallest, 1, null, 1);
     imagedestroy($lineImage["image"]);
 
     $height = $lineImage["height"];
-
     $linesCount = count($layout->getLines());
-    $totalHeight = (($height * $this->verticalSpaceMultiplier) + $height) * $linesCount;
-
+    $totalHeight = ($height * (1 + $this->verticalSpaceMultiplier)) * $linesCount;
     if($totalHeight > $this->imageHeight) {
       $this->fontSize *= $this->imageHeight / $totalHeight;
       $this->fontSize = round($this->fontSize);
     }
+
+    // Now that the font is set, calculate the line height
+    $this->calculateLineHeight();
 
     return $this->fontSize;
 
@@ -125,11 +144,8 @@ class TextImageV2 {
   }
 
   public function getTotalHeight() {
-    $layout = $this->layout;
-    // This is the maximum height of a line of text (I think)
-    $gNBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "gN");
-    $gNHeight = $gNBox[1] - $gNBox[5];
-    $height = ($gNHeight * (1 + $this->verticalSpaceMultiplier)) * count($layout->getLines());
+    $height = $this->lineHeight;
+    $height = ($height * (1 + $this->verticalSpaceMultiplier)) * count($this->layout->getLines());
     return $height;
   }
 
@@ -164,23 +180,13 @@ class TextImageV2 {
       }
 
       // Get the bounding box of the line of text
-      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $lineText);
+//      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $lineText);
+
+      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "W");
 
       $heightAboveBaseline = -$box[5];
 
-      $eachLineHeight = $this->imageHeight / count($this->layout->getLines());
-
-      // If first line, calculate y value to vertically center text
-      if($currentY == 0) {
-        // Commented because no longer vertically centering...adjusting image height instead
-        // $totalHeight = ($lineHeight + ($lineHeight * $this->verticalSpaceMultiplier)) * count($this->textLines);
-        // $currentY = $lineHeight + (($this->imageHeight - $totalHeight) / 2) - ($lineHeight * $this->verticalSpaceMultiplier * 1.5);
-        //$currentY = -$box[5];
-      }
-      else {
-//        $currentY += $eachLineHeight;
-      }
-
+      $eachLineHeight = $this->lineHeight;
 
       $lineImage = $this->createImageResourceForLineOfMarkup($line, $eachLineHeight, $transparent, $heightAboveBaseline);
 
@@ -190,7 +196,7 @@ class TextImageV2 {
       imagecopy($image, $lineImage["image"], $x, $currentY, 0, 0, $lineImage["width"], $eachLineHeight);
       imagedestroy($lineImage["image"]);
 
-      $currentY += $eachLineHeight;
+      $currentY += $eachLineHeight + ($eachLineHeight * $this->verticalSpaceMultiplier);
 
     }
     $this->imageResource = $image;

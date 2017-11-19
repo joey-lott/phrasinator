@@ -48,7 +48,20 @@ use App\RPL\TextToMarkup;
 Route::get('/test2', function(Request $request) {
   $t2m = new TextToMarkup("this [[[color=ff0000]]]is[[[/color]]] a phrase");
   $til = new TextImageLayout($t2m, base_path()."/fonts/knockout.ttf");
-  dump($til->getLines());
+  $image = imagecreatetruecolor(1,1);
+  $imgColor = imagecolorallocate($image, 0, 0, 0);
+  $x = 0;
+  $printText = "a";
+  $bBox = imagettftext($image, 100, 0, $x, 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
+  dump(($bBox[1] - $bBox[5]));
+  $printText = "b";
+  $bBox = imagettftext($image, 100, 0, $bBox[2], 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
+//  dump($bBox);
+  dump(($bBox[1] - $bBox[5]));
+  $printText = "g";
+  $bBox = imagettftext($image, 200, 0, $bBox[2], 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
+  dump(($bBox[1] - $bBox[5]));
+
 });
 Auth::routes();
 

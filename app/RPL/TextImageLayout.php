@@ -24,15 +24,38 @@ class TextImageLayout {
   }
 
   public function getLongestLine() {
-    $longestCount = 0;
+    $longestWidth = 0;
     $longest;
     foreach($this->lines as $line) {
-      if(count($line) > $longestCount) {
-        $longestCount = count($line);
+      $lineText = "";
+      foreach($line as $char) {
+        $lineText .= $char->character;
+      }
+      $width = $this->getTotalDimensionsOfTextInOneLine($lineText)[0];
+      if($width > $longestWidth) {
+        $longestWidth = $width;
         $longest = $line;
       }
     }
     return $longest;
+  }
+
+
+  public function getTallestLine() {
+    $max = 0;
+    $tallest;
+    foreach($this->lines as $line) {
+      $lineText = "";
+      foreach($line as $char) {
+        $lineText .= $char->character;
+      }
+      $height = $this->getTotalDimensionsOfTextInOneLine($lineText)[1];
+      if($height > $max) {
+        $max = $height;
+        $tallest = $line;
+      }
+    }
+    return $tallest;
   }
 
   private function breakIntoLines() {
