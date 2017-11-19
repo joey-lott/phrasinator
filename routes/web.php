@@ -23,7 +23,6 @@ Route::post("/generate", "GeneratorController@generate");
 
 Route::get('/generate', "GeneratorController@form");
 
-
 Route::get('/straightoutta', function () {
   return "<html><body><form action='/straightoutta' method='post'>".csrf_field()."outta what? <input type='text' name='outta'><br>move it left? <input type='text' name='moveLeft' value='0'><br><button>MAKE IT</button></body></html>";
 });
@@ -33,43 +32,24 @@ Route::post('/straightoutta', function (Request $request) {
   return "<html><body><img src='".$uris["black"]."' width='280' height='300'><img src='".$uris["white"]."' width='280' height='300' style='background-color:black'></body></html>";
 });
 
-use App\RPL\TextToMarkup;
-Route::get('/test', function() {
-
-  $font = "GILLUBCD.ttf";
-  $fontSize = 150;
-  $image = imagecreatetruecolor(500, 500);
-  $black = imagecolorallocate($image, 0, 0, 0);
-  $white = imagecolorallocate($image, 255, 255, 255);
-  $red = imagecolorallocate($image, 255, 0, 0);
-  $green = imagecolorallocate($image, 0, 255, 0);
-  imagefilledrectangle($image, 0, 0, 500, 500, $white);
-
-
-  $phrase = "PSYCHOTIC TEACHER";
-  $chars = preg_split("//u", $phrase, null, PREG_SPLIT_NO_EMPTY);
-
-  $x = 0;
-  $y = 200;
-  $kerning = 0;
-  foreach($chars as $char) {
-    $charResponse = imagettftext($image, $fontSize, 0, $x, $y, $black, "../fonts/".$font, $char);
-    $characterBox = imagettfbbox($fontSize, 0, "../fonts/".$font, $char);
-    dump($characterBox);
-    dump($charResponse);
-    //$characterWidth = $characterBox[2] - $characterBox[0];
-    $x = $charResponse[2] + $kerning;
-    //var_dump($charResponse[4]);
-  }
-
-
-  imagedestroy($image);
-
-  // $phrase = "señor 123 456:::7890 [[[color=FF0000]]]a:::[[[/color]]][[[color=00FF00]]]bc defg hijk[[[/color]]] lmno p[[[color=0000FF]]]qrs[[[/color]]]tu";
-  // $t2m = new TextToMarkup($phrase);
-  // dd($t2m->words);
+use App\RPL\TextImageV2;
+Route::get('/test', function(Request $request) {
+  $fontName = isset($request->fontName) ? $request->fontName : "knockout.ttf";
+  $phrase = isset($request->phrase) ? $request->phrase : "tesT [[[color=ff0000]]]ph[[[/color]]]rasE";
+  $image = new TextImageV2($phrase, $fontName, 1000, 1000);
+  $image->adjustFontToFillSpace();
+  $resources = $image->generateImageResource();
+  $path = $image->saveImage("test");
+  return "<html><body><img src='images/{$path}'></body></html>";
 });
 
+use App\RPL\TextImageLayout;
+use App\RPL\TextToMarkup;
+Route::get('/test2', function(Request $request) {
+  $t2m = new TextToMarkup("this [[[color=ff0000]]]is[[[/color]]] a phrase");
+  $til = new TextImageLayout($t2m, base_path()."/fonts/knockout.ttf");
+  dump($til->getLines());
+});
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

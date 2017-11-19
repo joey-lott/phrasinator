@@ -7,7 +7,6 @@ use App\RPL\Color;
 class TextToMarkup {
 
   public $phrases;
-  public $words;
   public $characters;
   public $rawWordsNoMarkup;
   public $rawPhraseNoMarkup;
@@ -26,6 +25,7 @@ class TextToMarkup {
     foreach($this->phrases as $phrase) {
       $phrases[] = $phrase->phrase;
     }
+
     // This results in the phrase minus the markup (but keeps the line delimiters)
     $this->rawPhraseNoMarkup = implode("", $phrases);
 

@@ -90,7 +90,7 @@ class TextImage {
   }
 
   public function arrangeWordsToLines() {
-    ////dump("arrangeWordsToLines");
+    //////dump("arrangeWordsToLines");
     if(strpos($this->text, ":::")) {
       return $this->arrangeWordsToLinesSpecialCharacters();
     }
@@ -100,7 +100,7 @@ class TextImage {
   }
 
   public function arrangeWordsToLinesSpecialCharacters() {
-    ////dump("arrangeWordsToLinesSpecialCharacters");
+    //////dump("arrangeWordsToLinesSpecialCharacters");
 
     // Why doing this here? Comment for now...
     // If the word dimensions haven't yet been calculated, do so first.
@@ -125,14 +125,14 @@ class TextImage {
 
       $lines[$i] = ["width" => $width, "height" => $height, "words" => $words];
     }
-    ////dump("setting textLines");
-    ////dump($lines);
+    //////dump("setting textLines");
+    //////dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function arrangeWordsToLinesGrid() {
-    ////dump("arrangeWordsToLinesGrid");
+    //////dump("arrangeWordsToLinesGrid");
     // Get the dimensions of the text in line long line.
     $dimensions = $this->getTotalDimensionsOfTextInOneLine();
 
@@ -216,14 +216,14 @@ class TextImage {
         array_push($lines, ["width" => $lineWidth, "height" => $lineHeight, "words" => $line]);
       }
     }
-    ////dump("setting textLines");
-    ////dump($lines);
+    //////dump("setting textLines");
+    //////dump($lines);
     $this->textLines = $lines;
     return $lines;
   }
 
   public function adjustFontToFillSpace() {
-    ////dump("adjustFontToFillSpace");
+    //////dump("adjustFontToFillSpace");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -254,7 +254,7 @@ class TextImage {
       $this->fontSize = round($this->fontSize);
     }
 
-//    ////dump("adjusted font size: ".$this->fontSize);
+//    //////dump("adjusted font size: ".$this->fontSize);
     // Adjust the word dimensions based on new font size.
     // This may break something.
     $this->getWordsDimensions();
@@ -265,7 +265,7 @@ class TextImage {
   }
 
   public function longestLine() {
-    ////dump("longestLine");
+    //////dump("longestLine");
     if(!isset($this->textLines)) {
       $this->arrangeWordsToLines();
     }
@@ -311,7 +311,6 @@ class TextImage {
   }
 
   public function generateImageResources() {
-    ////dump("generateImageResources");
     // First, delete all images in the images folder
     $files = glob(base_path()."/public/images/*");
     foreach($files as $file) {
@@ -348,15 +347,6 @@ class TextImage {
 
     $markedUpCharacterIndex = 0;
 
-    // $nBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "n");
-    // $NBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "N");
-    // $gBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "g");
-    // $gNBox = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "gN");
-    // $nHeight = $nBox[1] - $nBox[5];
-    // $NHeight = $NBox[1] - $NBox[5];
-    // $gHeight = $gBox[1] - $gBox[5];
-    // $gNHeight = $gNBox[1] - $gNBox[5];
-
     foreach($this->textLines as $line) {
       // Join the words of the line together
       $lineText = implode(" ", $line["words"]);
@@ -366,9 +356,6 @@ class TextImage {
 
       $lineWidth = $box[2] - $box[0];
       $lineHeight = $box[1] - $box[5];
-
-      // Get the average width per character.
-      $widthPerCharacter = $lineWidth / count(preg_split("//u", $lineText, null, PREG_SPLIT_NO_EMPTY));
 
       // If first line, calculate y value to vertically center text
       if($currentY == 0) {
@@ -387,6 +374,8 @@ class TextImage {
 
       // Get the words
       $lineWords = $line["words"];
+
+      $this->createImageResourceForLineOfText($lineWords);
 
       // Now, add each individual mark up word
       for($i = 0; $i < count($lineWords); $i++) {
@@ -411,9 +400,9 @@ class TextImage {
           $bBox = imagettftext($image, $this->fontSize, 0, $x, $currentY, $imgColor, base_path()."/fonts/".$this->font, $printText);
           imagettftext($imageWhite, $this->fontSize, 0, $x, $currentY, $imgColorWhite, base_path()."/fonts/".$this->font, $printText);
 
-          dump($printText);
-          dump($characterBox);
-          dump($bBox);
+          //dump($printText);
+          //dump($characterBox);
+          //dump($bBox);
 
           $characterSpacing = 0;//$characterBox[0];
           $x = $bBox[2] + ($characterBox[0] * 1) + $characterSpacing;
@@ -465,14 +454,14 @@ class TextImage {
     $image = $this->imageResources["dark"];
     $imageWhite = $this->imageResources["light"];
 
-    //dump("destroying text image resources");
-    //dump($image);
-    //dump($imageWhite);
+    ////dump("destroying text image resources");
+    ////dump($image);
+    ////dump($imageWhite);
     imagedestroy($image);
     imagedestroy($imageWhite);
-    //dump("destroyed");
-    //dump($image);
-    //dump($imageWhite);
+    ////dump("destroyed");
+    ////dump($image);
+    ////dump($imageWhite);
   }
 
 }
