@@ -12,10 +12,14 @@ class TextToMarkup {
   public $rawPhraseNoMarkup;
   public $colors;
 
-  public function __construct($text) {
+  private $defaultTextColor;
+
+  public function __construct($text, $defaultTextColor = null) {
     $this->phrases = $this->breakIntoPhrases($text);
     $this->breakIntoWords();
     $this->breakIntoCharacters();
+    if(!isset($defaultTextColor)) $defaultTextColor = new Color("000000");
+    $this->defaultTextColor = $defaultTextColor;
   }
 
   private function breakIntoWords() {
@@ -46,11 +50,11 @@ class TextToMarkup {
   private function breakIntoPhrases($text) {
     $brokenUpByClosingMarkup = preg_split("/\[\[\[\/color\]]]/", $text);
     $phrases = [];
-    $this->colors = [new Color("000000")];
+    $this->colors = [$this->defaultTextColor];
     foreach($brokenUpByClosingMarkup as $chunk) {
       $chunksForMarkUp = preg_split("/\[\[\[color=([0-9a-zA-Z]{6})]]]/", $chunk, -1, PREG_SPLIT_DELIM_CAPTURE);
-      // The first element is always black
-      $markUp = new MarkedUpPhrase($chunksForMarkUp[0], new Color("000000"));
+      // The first element is always the default color
+      $markUp = new MarkedUpPhrase($chunksForMarkUp[0], $this->defaultTextColor);
       $phrases[] = $markUp;
       // If there are more than one, that means the second element is the color
       // and the third is the phrase to apply the color to

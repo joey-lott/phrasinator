@@ -18,14 +18,22 @@ class TextImageV2 {
   private $textToMarkup;
   private $layout;
 
-  public function __construct($text, $font, $width = null, $height = null) {
+  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null) {
     $this->text = $text;
     $this->font = $font;
-    $this->textToMarkup = new TextToMarkup($text);
+    $this->textToMarkup = new TextToMarkup($text, $defaultTextColor);
     $this->layout = new TextImageLayout($this->textToMarkup, base_path()."/fonts/".$this->font);
     if(isset($width)) $this->imageWidth = $width;
     if(isset($height)) $this->imageHeight = $height;
     $this->containsSpecialCharacters = (boolean) strpos($text, ":::");
+  }
+
+  public function getFileName() {
+    $raw = $this->textToMarkup->rawWordsNoMarkup;
+    for($i = 0; $i < count($raw); $i++) {
+      $raw[$i] = implode("", preg_split("/[^a-zA-Z0-9]/", $raw[$i]));
+    }
+    return implode("-", $raw);
   }
 
 
@@ -126,13 +134,6 @@ class TextImageV2 {
   }
 
   public function generateImageResource() {
-    // First, delete all images in the images folder
-    $files = glob(base_path()."/public/images/*");
-    foreach($files as $file) {
-      if(is_file($file)) {
-        unlink($file);
-      }
-    }
 
     // Adjust the height of the image to match the total height of the text
     $this->imageHeight = $this->getTotalHeight();

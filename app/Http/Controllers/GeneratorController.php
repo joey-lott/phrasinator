@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\RPL\TextImageV2;
 use App\RPL\CompositeImage;
+use App\RPL\Color;
 
 class GeneratorController extends Controller
 {
@@ -17,13 +18,14 @@ class GeneratorController extends Controller
     }
 
     public function generate(Request $request) {
-      // $image = new TextImage($request->phrase, $request->fontName, $width, $heightRemaining);
-      // $image->adjustFontToFillSpace();
-      // $resources = $image->generateImageResources();
-      // $path1 = "/images/".($path1);
-      // $path2 = "/images/".($path2);
-      // // $path2 = "/images/".($paths[1]);
-      // return view("displayimages", ["path1" => $path1, "path2" => $path2]);
+
+      // First, delete all images in the images folder
+      $files = glob(base_path()."/public/images/*");
+      foreach($files as $file) {
+        if(is_file($file)) {
+          unlink($file);
+        }
+      }
 
       $size = $request->size;
       $width = 3000;
@@ -36,26 +38,6 @@ class GeneratorController extends Controller
         $width = 1500;
         $height = 1500;
       }
-      $compositeDark = new CompositeImage($width, $height);
-      $compositeLight = new CompositeImage($width, $height);
-      // If image location was set to above or below (not none), try to grab the image
-      if($request->imageLocation == "above" || $request->imageLocation == "below") {
-          // If the pixabay image was selected from the grid of search results
-          if(isset($request->pixabayImage)) {
-            // Get the image from pixabay
-            $compositeDark->fetchFromUrl($request->pixabayImage);
-            $compositeLight->fetchFromUrl($request->pixabayImage);
-          }
-      }
-      // This is how much height remains to fill in the composite image.
-      // Only need to do this for one of the composites since both will report the same
-      $heightRemaining = $compositeDark->fetchHeightRemaining();
-
-      ini_set('max_execution_time', 60);
-      // Set a default font size to -1 (which means ignore font size setting)
-      // This is no longer used. Can probably delete next line. Comment for now.
-      //$fontSize = isset($request->fontSize) ? $request->fontSize : -1;
-
 
       session(["phrase" => $request->phrase,
                "fontName" => $request->fontName,
@@ -63,8 +45,39 @@ class GeneratorController extends Controller
                "imageLocation" => $request->imageLocation,
                "imageUrl" => $request->pixabayImage]);
 
+         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_dark", new Color("000000"));
+         $path1 = "/images/".($path);
+         $path = $this->makeComposite($width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, "_light", new Color("FFFFFF"));
+         $path2 = "/images/".($path);
+
+         return view("displayimages", ["path1" => $path1, "path2" => $path2]);
+
+    }
+
+    private function makeComposite($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $fileNameUniqueSuffix, $color) {
+      $composite = new CompositeImage($width, $height);
+
+      // If image location was set to above or below (not none), try to grab the image
+      if($imageLocation == "above" || $imageLocation == "below") {
+          // If the pixabay image was selected from the grid of search results
+          if(isset($pixabayImage)) {
+            // Get the image from pixabay
+            $composite->fetchFromUrl($pixabayImage);
+          }
+      }
+      // This is how much height remains to fill in the composite image.
+      // Only need to do this for one of the composites since both will report the same
+      $heightRemaining = $composite->fetchHeightRemaining();
+
+      ini_set('max_execution_time', 60);
+      // Set a default font size to -1 (which means ignore font size setting)
+      // This is no longer used. Can probably delete next line. Comment for now.
+      //$fontSize = isset($request->fontSize) ? $request->fontSize : -1;
+
+
+
       // Generate the text image
-      $image = new TextImageV2($request->phrase, $request->fontName, $width, $heightRemaining);
+      $image = new TextImageV2($phrase, $fontName, $width, $heightRemaining, $color);
       $image->adjustFontToFillSpace();
       $resource = $image->generateImageResource();
 
@@ -73,19 +86,16 @@ class GeneratorController extends Controller
       // location relative to the text. But here, we are adding the text
       // to the composite. So if imageLocation is "above", call addBelow(),
       // and vice versa.
-      if($request->imageLocation == "above") {
-        $compositeDark->addBelow($resource);
+      if($imageLocation == "above") {
+        $composite->addBelow($resource);
       }
       else {
-        $compositeDark->addAbove($resource);
+        $composite->addAbove($resource);
       }
       // Set the transparency of the composite to the transparency generated by the text image
-      $compositeDark->setTransparent($image->transparent);
-      $path1 = $compositeDark->saveToDisk($request->phrase."_dark");
-      $path1 = "/images/".($path1);
-      $path2 = "/images/".($path1);
-      // $path2 = "/images/".($paths[1]);
-      return view("displayimages", ["path1" => $path1, "path2" => $path2]);
+      $composite->setTransparent($image->transparent);
+      $path = $composite->saveToDisk($image->getFileName()."".$fileNameUniqueSuffix);
+      return $path;
     }
 
     public function form(Request $request) {
