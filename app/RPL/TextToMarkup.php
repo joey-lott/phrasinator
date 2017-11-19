@@ -15,11 +15,11 @@ class TextToMarkup {
   private $defaultTextColor;
 
   public function __construct($text, $defaultTextColor = null) {
+    if(!isset($defaultTextColor)) $defaultTextColor = new Color("000000");
+    $this->defaultTextColor = $defaultTextColor;
     $this->phrases = $this->breakIntoPhrases($text);
     $this->breakIntoWords();
     $this->breakIntoCharacters();
-    if(!isset($defaultTextColor)) $defaultTextColor = new Color("000000");
-    $this->defaultTextColor = $defaultTextColor;
   }
 
   private function breakIntoWords() {
