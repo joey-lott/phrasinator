@@ -30,13 +30,17 @@
             </select>
           </div>
         </div>
-        <!--div>
-          font size: <input type="text" name="fontSize" value="-1"> (leave -1 to use default)
-        </div-->
         <div class="row form-group">
           <label class="form-group col-md-2">Phrase:</label>
           <div class="col-md-10">
             <input type="text" name="phrase" class="form-control" value="{{$phrase}}">
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <label class="form-group col-md-2">Line Spacing:</label>
+          <div class="col-md-10">
+            <input type="range" name="lineSpacing" class="form-control" min="0" max=".5" step="0.05" value="{{$lineSpacing}}">
           </div>
         </div>
 

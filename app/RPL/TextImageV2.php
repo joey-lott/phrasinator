@@ -20,7 +20,7 @@ class TextImageV2 {
   // Store the height of one line of text. This gets calculated once. Used many times.
   private $lineHeight;
 
-  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null) {
+  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1) {
     $this->text = $text;
     $this->font = $font;
     $this->textToMarkup = new TextToMarkup($text, $defaultTextColor);
@@ -28,6 +28,7 @@ class TextImageV2 {
     if(isset($width)) $this->imageWidth = $width;
     if(isset($height)) $this->imageHeight = $height;
     $this->containsSpecialCharacters = (boolean) strpos($text, ":::");
+    $this->verticalSpaceMultiplier = $lineSpacing;
   }
 
   public function getFileName() {
@@ -183,8 +184,9 @@ class TextImageV2 {
 //      $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, $lineText);
 
       $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "W");
+      $diff = $this->lineHeight - ($box[1] - $box[5]);
 
-      $heightAboveBaseline = -$box[5];
+      $heightAboveBaseline = -$box[5] + ($diff / 2);
 
       $eachLineHeight = $this->lineHeight;
 
