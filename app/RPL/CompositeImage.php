@@ -49,8 +49,7 @@ class CompositeImage {
     $this->transparencyColor = $transparent;
   }
 
-  public function saveToDisk($name) {
-    $fileName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
+  public function saveToDisk($fileName) {
 
     $compositeImage = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
 

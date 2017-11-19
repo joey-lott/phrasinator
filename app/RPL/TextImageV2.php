@@ -31,7 +31,7 @@ class TextImageV2 {
   public function getFileName() {
     $raw = $this->textToMarkup->rawWordsNoMarkup;
     for($i = 0; $i < count($raw); $i++) {
-      $raw[$i] = implode("", preg_split("/[^a-zA-Z0-9]/", $raw[$i]));
+      $raw[$i] = implode("", preg_split("/[^a-zA-Z0-9\_]/", $raw[$i]));
     }
     return implode("-", $raw);
   }
