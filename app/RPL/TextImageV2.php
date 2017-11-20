@@ -42,11 +42,16 @@ class TextImageV2 {
   }
 
 
-  public function createImageResourceForLineOfMarkup($lineOfMarkup, $height, $transparent, $lineHeight) {
+  public function createImageResourceForLineOfMarkup($lineOfMarkup, $height, $transparent, $baselineToTopOfText, $fontSizeMultiplier = 1) {
 
     $image = imagecreatetruecolor($this->imageWidth, $height);
     imagecolortransparent($image, $transparent);
     imagefilledrectangle($image, 0, 0, $this->imageWidth, $height, $transparent);
+
+    // $red = imagecolorallocate($image, 254, 1, 1);
+    // imagefilledrectangle($image, 0, 0, $this->imageWidth, 10, $red);
+    // imagefilledrectangle($image, 0, $height - 10, $this->imageWidth, $height, $red);
+
 
     $x = 0;
     $height = 0;
@@ -59,7 +64,9 @@ class TextImageV2 {
 
       $printText = $markup->character;
 
-      $bBox = imagettftext($image, $this->fontSize, 0, $x, $lineHeight, $imgColor, base_path()."/fonts/".$this->font, $printText);
+      // Use the negative of the color to turn off anti-aliasing. Otherwise,
+      // there can be some weird artifacts as a result of transparency
+      $bBox = imagettftext($image, $this->fontSize * $fontSizeMultiplier, 0, $x, $baselineToTopOfText, -$imgColor, base_path()."/fonts/".$this->font, $printText);
 
       $x = $bBox[2];
       // Get the character height
@@ -67,7 +74,7 @@ class TextImageV2 {
       // If this is the max height, keep track
       if($charHeight > $height) $height = $charHeight;
     }
-    return ["image" => $image, "width" => $bBox[2], "height" => $charHeight];
+    return ["image" => $image, "width" => $bBox[2], "height" => $height];
   }
 
   private function generateLineWithAllCharacters() {
@@ -84,7 +91,10 @@ class TextImageV2 {
     $tallest = $this->generateLineWithAllCharacters();
     $lineImage = $this->createImageResourceForLineOfMarkup($tallest, 1, null, 1);
     imagedestroy($lineImage["image"]);
-    $this->lineHeight = $lineImage["height"];
+    // Multiply by 1.05 as a hack because it seems that some fonts
+    // report their height off by a few pixels. Multiplying by 1.05
+    // increases the height a little so the text doesn't get cut off
+    $this->lineHeight = $lineImage["height"];// * 1.05;
   }
 
   public function adjustFontToFillSpace() {
@@ -117,7 +127,11 @@ class TextImageV2 {
     $height = $lineImage["height"];
     $linesCount = count($layout->getLines());
     $totalHeight = ($height * (1 + $this->verticalSpaceMultiplier)) * $linesCount;
-    if($totalHeight > $this->imageHeight) {
+    // The print height should be less than the entire image height
+    // to prevent text getting cut off. This is a hack because some
+    // fonts report incorrect height.
+    $printHeight = $this->imageHeight;
+    if($totalHeight > $printHeight) {
       $this->fontSize *= $this->imageHeight / $totalHeight;
       $this->fontSize = round($this->fontSize);
     }
@@ -165,7 +179,7 @@ class TextImageV2 {
     $transparencyColor = $this->generateNewTransparencyColor();
     $transparent = imagecolorallocate($image, $transparencyColor->red, $transparencyColor->green, $transparencyColor->blue);
 
-    // Fill the image with red and set red to transparent
+    // Fill the image with transparent color and set transparent
     imagefilledrectangle($image, 0, 0, $this->imageWidth, $this->imageHeight, $transparent);
     imagecolortransparent($image, $transparent);
 
@@ -195,11 +209,16 @@ class TextImageV2 {
       $box = imagettfbbox($this->fontSize, 0, base_path()."/fonts/".$this->font, "W");
       $diff = $this->lineHeight - ($box[1] - $box[5]);
 
-      $heightAboveBaseline = -$box[5] + ($diff / 2);
+      $heightAboveBaseline = -$box[5];// - ($diff / 2);
 
       $eachLineHeight = $this->lineHeight;
 
-      $lineImage = $this->createImageResourceForLineOfMarkup($line, $eachLineHeight, $transparent, $heightAboveBaseline);
+      // Create the line of text using 0.85 as a font size multipler.
+      // The 0.85 is a hack to reduce the size of the printed font
+      // relative to the calculated space because the fonts can report
+      // some strange values that result in a few pixels getting shaved
+      // off otherwise.
+      $lineImage = $this->createImageResourceForLineOfMarkup($line, $eachLineHeight, $transparent, $heightAboveBaseline, 0.85);
 
       // This is the x position of the first word in the line
       switch($this->textJustification) {
@@ -219,6 +238,7 @@ class TextImageV2 {
       $currentY += $eachLineHeight + ($eachLineHeight * $this->verticalSpaceMultiplier);
 
     }
+
     $this->imageResource = $image;
     return $image;
   }
