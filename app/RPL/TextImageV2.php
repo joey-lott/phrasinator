@@ -17,8 +17,10 @@ class TextImageV2 {
   public $transparent;
   private $textToMarkup;
   private $layout;
-  // Store the height of one line of text. This gets calculated once. Used many times.
+  // Store the height of one line of text including line spacing. This gets calculated once. Used many times.
   private $lineHeight;
+  // Store the height of one line of text - text only, no line spacing
+  private $lineTextHeight;
   private $textJustification;
 
   public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1, $textJustification = "center") {
@@ -91,10 +93,11 @@ class TextImageV2 {
     $tallest = $this->generateLineWithAllCharacters();
     $lineImage = $this->createImageResourceForLineOfMarkup($tallest, 1, null, 1);
     imagedestroy($lineImage["image"]);
-    // Multiply by 1.05 as a hack because it seems that some fonts
-    // report their height off by a few pixels. Multiplying by 1.05
-    // increases the height a little so the text doesn't get cut off
-    $this->lineHeight = $lineImage["height"];// * 1.05;
+
+    // The lineHeight is the height including line spacing
+    $this->lineHeight = $lineImage["height"] * (1 + $this->verticalSpaceMultiplier);
+    // The lineTextHeight is the height of the actual text
+    $this->lineTextHeight = $lineImage["height"];
   }
 
   public function adjustFontToFillSpace() {
@@ -126,7 +129,7 @@ class TextImageV2 {
 
     $height = $lineImage["height"];
     $linesCount = count($layout->getLines());
-    $totalHeight = ($height * (1 + $this->verticalSpaceMultiplier)) * $linesCount;
+    $totalHeight = ($height * (1 + ($this->verticalSpaceMultiplier))) * $linesCount;//($height * (1 + abs($this->verticalSpaceMultiplier))) * $linesCount;
     // The print height should be less than the entire image height
     // to prevent text getting cut off. This is a hack because some
     // fonts report incorrect height.
@@ -162,7 +165,9 @@ class TextImageV2 {
 
   public function getTotalHeight() {
     $height = $this->lineHeight;
-    $height = ($height * (1 + $this->verticalSpaceMultiplier)) * count($this->layout->getLines());
+    $multiplier = $this->verticalSpaceMultiplier > 0 ? $this->verticalSpaceMultiplier : $this->verticalSpaceMultiplier / 2;
+    //$height = $height * count($this->layout->getLines());//($height * (1 + $multiplier)) * count($this->layout->getLines());
+    $height = ($height * (1 + $multiplier)) * (count($this->layout->getLines()) - 1) + $height;
     return $height;
   }
 
@@ -195,8 +200,10 @@ class TextImageV2 {
     imagedestroy($lineImage["image"]);
     $longestLineWidth = $lineImage["width"];
 
-    foreach($this->layout->getLines() as $line) {
+    $lines = $this->layout->getLines();
 
+    for($i = 0; $i < count($lines); $i++) {
+      $line = $lines[$i];
       // Join the characters of the line together
       $lineText = "";
       foreach($line as $char) {
@@ -211,13 +218,14 @@ class TextImageV2 {
 
       $heightAboveBaseline = -$box[5];// - ($diff / 2);
 
-      $eachLineHeight = $this->lineHeight;
+      $eachLineHeight = $this->lineTextHeight;
 
       // Create the line of text using 0.85 as a font size multipler.
       // The 0.85 is a hack to reduce the size of the printed font
       // relative to the calculated space because the fonts can report
       // some strange values that result in a few pixels getting shaved
       // off otherwise.
+      $thisLineHeight = $i < count($lines) - 1 ? $eachLineHeight : $eachLineHeight;
       $lineImage = $this->createImageResourceForLineOfMarkup($line, $eachLineHeight, $transparent, $heightAboveBaseline, 0.85);
 
       // This is the x position of the first word in the line
@@ -235,7 +243,7 @@ class TextImageV2 {
       imagecopy($image, $lineImage["image"], $x, $currentY, 0, 0, $lineImage["width"], $eachLineHeight);
       imagedestroy($lineImage["image"]);
 
-      $currentY += $eachLineHeight + ($eachLineHeight * $this->verticalSpaceMultiplier);
+      $currentY += $this->lineHeight + ($this->lineHeight * $this->verticalSpaceMultiplier);
 
     }
 

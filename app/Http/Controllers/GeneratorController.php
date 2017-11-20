@@ -115,7 +115,7 @@ class GeneratorController extends Controller
       $size = session()->has("size") ? session()->get("size") : "large";
       $imageLocation = session()->has("imageLocation") ? session()->get("imageLocation") : "";
       $imageUrl = session()->has("imageUrl") ? session()->get("imageUrl") : "";
-      $lineSpacing = session()->has("lineSpacing") ? session()->get("lineSpacing") : .1;
+      $lineSpacing = session()->has("lineSpacing") ? session()->get("lineSpacing") : 0;
       $textJustification = session()->has("textJustification") ? session()->get("textJustification") : "center";
       return view("formWithImageSelector", ["phrase" => $phrase, "fontName" => $fontName, "size" => $size,
       "imageLocation" => $imageLocation,

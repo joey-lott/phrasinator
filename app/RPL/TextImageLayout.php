@@ -83,7 +83,7 @@ class TextImageLayout {
           $line[] = new MarkedUpCharacter(" ", null);
         }
       }
-      $lines[] = $line;
+      if(count($line) > 0) $lines[] = $line;
     }
     $this->lines = $lines;
   }

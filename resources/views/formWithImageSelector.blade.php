@@ -47,7 +47,7 @@
         <div class="row form-group">
           <label class="form-group col-md-2">Line Spacing:</label>
           <div class="col-md-10">
-            <input type="range" name="lineSpacing" class="form-control" min="0" max=".5" step="0.05" value="{{$lineSpacing}}">
+            <input type="range" name="lineSpacing" class="form-control" min="-0.2" max=".3" step="0.05" value="{{$lineSpacing}}">
           </div>
         </div>
 
