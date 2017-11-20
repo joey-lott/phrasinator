@@ -1,6 +1,7 @@
 @extends("layouts.app")
 
 @section("content")
+<script src="js/jscolor.js"></script>
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
@@ -37,6 +38,16 @@
           </div>
         </div>
 
+        <div class="row form-group">
+          <label class="form-group col-md-2">Color Markup Generator:</label>
+          <div class="col-md-3">
+            <input class="jscolor" onchange="updateColorMarkup(this.jscolor)">
+          </div>
+          <div class="col-md-7">
+            <input type="text" id="colorMarkup" class="form-control">
+          </div>
+        </div>
+
         <div>
           <button class="btn btn-primary">Make Image</button>
         </div>
@@ -47,7 +58,7 @@
         <div class="row form-group">
           <label class="form-group col-md-2">Line Spacing:</label>
           <div class="col-md-10">
-            <input type="range" name="lineSpacing" class="form-control" min="-0.3" max=".5" step="0.05" value="{{$lineSpacing}}">
+            <input type="range" name="lineSpacing" class="form-control" min="-0.5" max=".5" step="0.01" value="{{$lineSpacing}}">
           </div>
         </div>
 
@@ -161,6 +172,10 @@
       $("#image"+i+"_label").css("border", "2px solid transparent");
     }
     $("#"+selectedRadio.id+"_label").css("border", selectedRadio.checked ? "2px solid #f00" : "2px solid transparent");
+  }
+
+  function updateColorMarkup(jscolor) {
+    $("#colorMarkup").val("[[[color="+jscolor.toString()+"]]]");
   }
 </script>
 @stop
