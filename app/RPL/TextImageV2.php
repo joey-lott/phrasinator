@@ -164,10 +164,10 @@ class TextImageV2 {
   }
 
   public function getTotalHeight() {
-    $height = $this->lineHeight;
-    $multiplier = $this->verticalSpaceMultiplier > 0 ? $this->verticalSpaceMultiplier : $this->verticalSpaceMultiplier / 2;
-    //$height = $height * count($this->layout->getLines());//($height * (1 + $multiplier)) * count($this->layout->getLines());
-    $height = ($height * (1 + $multiplier)) * (count($this->layout->getLines()) - 1) + $height;
+    // The height is the lineHeight (includes spacing) times one less than
+    // the total number of lines, plus the height of one line of text
+    // because the last line shouldn't include spacing below it
+    $height = $this->lineHeight * (count($this->layout->getLines()) - 1) + $this->lineTextHeight;
     return $height;
   }
 
@@ -243,7 +243,8 @@ class TextImageV2 {
       imagecopy($image, $lineImage["image"], $x, $currentY, 0, 0, $lineImage["width"], $eachLineHeight);
       imagedestroy($lineImage["image"]);
 
-      $currentY += $this->lineHeight + ($this->lineHeight * $this->verticalSpaceMultiplier);
+      // $this->lineHeight is the height of the line including line spacing.
+      $currentY += $this->lineHeight;
 
     }
 
