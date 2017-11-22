@@ -17,6 +17,7 @@
                     </div>
                   </div>
 
+
                   <div class="row">
                     <div class="col-md-6">
                       <img id="image1" width='200' height='200' border='1' style="border: 1px solid #000">
