@@ -16,7 +16,7 @@ class CreateUserLatestJobTimesTable extends Migration
         Schema::create('user_latest_job_times', function (Blueprint $table) {
             $table->increments('id');
             $table->integer("userId")->unsigned();
-            $table->timestamp("latestJobTime");
+            $table->timestamp("latestJobTime")->nullable();
             $table->timestamps();
         });
     }
