@@ -18,8 +18,13 @@ use App\RPL\StraightOuttaImage;
 
 Route::get("/", function() { return redirect("/home");});
 
-Route::post("/generate", "GeneratorController@generate");
 //Route::get('/authorize', "PinAuthController@getToken");
+
+// Uncomment to use non-queued version
+//Route::post("/generate", "GeneratorController@generate");
+
+// This is the queued version. Comment this if useing the non-queued version
+Route::post("/generate", "GeneratorController@generateQueuedImageJob");
 
 Route::get('/generate', "GeneratorController@form");
 
@@ -66,3 +71,14 @@ Route::get('/test2', function(Request $request) {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+use App\ImagePaths;
+use App\Jobs\GenerateCompositeImage;
+
+Route::get('imageJob', function() {
+//   $user = auth()->user();
+// //  dump($user);
+//   $userId = $user->id;
+//   ImagePaths::where("userId", $userId)->delete();
+//   GenerateCompositeImage::dispatch(auth()->user()->id, 3000, 3000, "this is a test", "knockout.ttf", "none", null, 0, "center", base_path()."/public/images/".$userId."/");
+});

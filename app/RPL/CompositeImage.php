@@ -49,7 +49,14 @@ class CompositeImage {
     $this->transparencyColor = $transparent;
   }
 
-  public function saveToDisk($fileName) {
+  public function saveToDisk($fileName, $path = null) {
+
+    if($path == null) {
+      $path = base_path()."/public/images/";
+    }
+
+    // If the path doesn't exist, create it first.
+    if(!file_exists($path)) mkdir($path);
 
     $compositeImage = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
 
@@ -78,7 +85,7 @@ class CompositeImage {
     }
 
     $name = $fileName.".png";
-    imagepng($compositeImage, base_path()."/public/images/".$name);
+    imagepng($compositeImage, $path.$name);
 
     $this->destroyResources();
     //dump("destroying composite image resource");

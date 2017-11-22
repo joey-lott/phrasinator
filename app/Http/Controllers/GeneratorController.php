@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\RPL\TextImageV2;
 use App\RPL\CompositeImage;
 use App\RPL\Color;
+use App\ImagePaths;
+use App\Jobs\GenerateCompositeImage;
+use Carbon\Carbon;
 
 class GeneratorController extends Controller
 {
@@ -15,6 +18,52 @@ class GeneratorController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    public function generateQueuedImageJob(Request $request) {
+
+      $userId = auth()->user()->id;
+
+      // Delete all the paths from previous jobs.
+      ImagePaths::where("userId", $userId)->delete();
+
+      $imagePath = base_path()."/public/images/".$userId."/";
+
+      // First, delete all images in the images folder
+      $files = glob($imagePath."*");
+      foreach($files as $file) {
+        if(is_file($file)) {
+          unlink($file);
+        }
+      }
+
+      $size = $request->size;
+      $width = 3000;
+      $height = 3000;
+      if($size == "medium") {
+        $width = 2000;
+        $height = 2000;
+      }
+      else if($size == "small") {
+        $width = 1500;
+        $height = 1500;
+      }
+
+      session(["phrase" => $request->phrase,
+               "fontName" => $request->fontName,
+               "size" => $request->size,
+               "imageLocation" => $request->imageLocation,
+               "imageUrl" => $request->pixabayImage,
+               "lineSpacing" => $request->lineSpacing,
+               "textJustification" => $request->textJustification]);
+
+
+      ImagePaths::where("userId", $userId)->delete();
+      GenerateCompositeImage::dispatch($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath);
+      // $job = new GenerateCompositeImage($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath);
+      // $job->handle();
+      return view("displayimagesqueued", ["userId" => $userId]);
+
     }
 
     public function generate(Request $request) {
