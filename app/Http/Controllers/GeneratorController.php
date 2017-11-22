@@ -17,7 +17,8 @@ class GeneratorController extends Controller
     //
     public function __construct()
     {
-        $this->middleware('auth');
+      dump(auth()->user());;
+        //$this->middleware('auth');
     }
 
     public function generateQueuedImageJob(Request $request) {
