@@ -2,6 +2,9 @@
 
 namespace App\RPL;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
+
 class CompositeImage {
 
   private $imageWidth = 3000;
@@ -51,12 +54,8 @@ class CompositeImage {
 
   public function saveToDisk($fileName, $path = null) {
 
-    if($path == null) {
-      $path = base_path()."/public/images/";
-    }
-
     // If the path doesn't exist, create it first.
-    if(!file_exists($path)) mkdir($path);
+    Storage::makeDirectory($path);
 
     $compositeImage = imagecreatetruecolor($this->imageWidth, $this->imageHeight);
 
@@ -85,15 +84,21 @@ class CompositeImage {
     }
 
     $name = $fileName.".png";
-    imagepng($compositeImage, $path.$name);
+
+    $tmpPath = base_path();
+
+    // Save a temp file locally.
+    imagepng($compositeImage, $tmpPath."/temp.png");
+
+    // Upload the temp file to s3
+    $storedFile = Storage::putFileAs($path, new File($tmpPath."/temp.png"), $name, "public");
+
+    $url = Storage::url($storedFile);
 
     $this->destroyResources();
-    //dump("destroying composite image resource");
-    //dump($compositeImage);
     imagedestroy($compositeImage);
-    //dump("destroyed");
-    //dump($compositeImage);
-    return $name;
+
+    return $url;
   }
 
   public function destroyResources() {

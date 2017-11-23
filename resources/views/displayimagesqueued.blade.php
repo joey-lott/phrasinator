@@ -63,6 +63,7 @@
       setTimeout(testForImages, 2000);
     }
     else {
+      console.log(response[0].imagePath);
       $("#message").empty();
       $("#message").html("Images created and loading...");
       $("#image1").attr("src", response[0].imagePath);

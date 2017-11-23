@@ -13,7 +13,7 @@
 
 use Illuminate\Http\Request;
 use App\Pinterest\PinAPI;
-
+use App\RPL\CompositeImage;
 use App\RPL\StraightOuttaImage;
 
 Route::get("/", function() { return redirect("/home");});
@@ -39,13 +39,17 @@ Route::post('/straightoutta', function (Request $request) {
 
 use App\RPL\TextImageV2;
 Route::get('/test', function(Request $request) {
+  $composite = new CompositeImage(1000, 1000);
   $fontName = isset($request->fontName) ? $request->fontName : "knockout.ttf";
   $phrase = isset($request->phrase) ? $request->phrase : "tesT [[[color=ff0000]]]ph[[[/color]]]rasE";
   $image = new TextImageV2($phrase, $fontName, 1000, 1000);
   $image->adjustFontToFillSpace();
-  $resources = $image->generateImageResource();
-  $path = $image->saveImage("test");
-  return "<html><body><img src='images/{$path}'></body></html>";
+  $resource = $image->generateImageResource();
+  $composite->addAbove($resource);
+  $composite->setTransparent($image->transparent);
+  $path = $composite->saveToDisk($image->getFileName(), auth()->user()->id);
+  dd($path);
+//  return "<html><body><img src='images/{$path}'></body></html>";
 });
 
 use App\RPL\TextImageLayout;
@@ -68,6 +72,16 @@ Route::get('/test2', function(Request $request) {
   dump(($bBox[1] - $bBox[5]));
 
 });
+
+use Illuminate\Support\Facades\Storage;
+Route::get("/tests3", function() {
+  Storage::makeDirectory("test");
+  $directories = Storage::directories("/");
+  dd($directories);
+  $files = Storage::files("/");
+  dd($files);
+});
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

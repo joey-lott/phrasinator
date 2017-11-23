@@ -10,6 +10,7 @@ use App\RPL\Color;
 use App\ImagePaths;
 use App\Jobs\GenerateCompositeImage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class GeneratorController extends Controller
 {
@@ -17,8 +18,7 @@ class GeneratorController extends Controller
     //
     public function __construct()
     {
-      dump(auth()->user());;
-        //$this->middleware('auth');
+        $this->middleware('auth');
     }
 
     public function generateQueuedImageJob(Request $request) {
@@ -30,13 +30,10 @@ class GeneratorController extends Controller
 
       $imagePath = base_path()."/public/images/".$userId."/";
 
-      // First, delete all images in the images folder
-      $files = glob($imagePath."*");
-      foreach($files as $file) {
-        if(is_file($file)) {
-          unlink($file);
-        }
-      }
+      // First, delete the user's files directory
+      Storage::deleteDirectory($userId);
+      // Then, create the directory for the user
+      Storage::makeDirectory($userId);
 
       $size = $request->size;
       $width = 3000;
