@@ -16,17 +16,9 @@
         <div class="row form-group">
           <label class="col-md-2 form-group">font style:</label>
           <div class="col-md-10">
-            <?php
-              $fonts = [["file" => "knockout.ttf", "label" => "knockout"],
-                        ["file" => "GILLUBCD.ttf", "label" => "gill"],
-                        ["file" => "KGSecondChancesSketch.ttf", "label" => "sketch"],
-                        ["file" => "STENCIL.ttf", "label" => "stencil"],
-                        ["file" => "jackport.ttf", "label" => "varsity"]
-                       ];
-            ?>
             <select name="fontName" class="form-control">
               @foreach($fonts as $font)
-                <option value="{{$font["file"]}}"<?php if($fontName == $font["file"]) echo " selected"; ?>>{{$font["label"]}}</option>
+                <option value="{{$font->file}}"<?php if($fontName == $font->file) echo " selected"; ?>>{{$font->label}}</option>
               @endforeach
             </select>
           </div>
@@ -53,6 +45,7 @@
         </div>
         <div></div>
 
+        @if($showExtras)
         <hr>
 
         <div class="row form-group">
@@ -118,7 +111,7 @@
           <button class="btn btn-primary">Make Image</button>
         </div>
       </form>
-
+      @endif
 
     </div>
 </div>

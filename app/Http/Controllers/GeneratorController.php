@@ -11,6 +11,7 @@ use App\ImagePaths;
 use App\Jobs\GenerateCompositeImage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Fonts;
 
 class GeneratorController extends Controller
 {
@@ -19,6 +20,7 @@ class GeneratorController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('subscribed');
     }
 
     public function generateQueuedImageJob(Request $request) {
@@ -148,6 +150,9 @@ class GeneratorController extends Controller
     }
 
     public function form(Request $request) {
+
+      // If "clear=now" is passed through the request, clear
+      // session data for a new image.
       if($request->clear == "now") {
         session()->forget("phrase");
         session()->forget("fontName");
@@ -157,6 +162,8 @@ class GeneratorController extends Controller
         session()->forget("lineSpacing");
 
       }
+
+      // If there is session data, use it to populate the form.
       $phrase = session()->has("phrase") ? session()->get("phrase") : "";
       $fontName = session()->has("fontName") ? session()->get("fontName") : "";
       $size = session()->has("size") ? session()->get("size") : "large";
@@ -164,11 +171,15 @@ class GeneratorController extends Controller
       $imageUrl = session()->has("imageUrl") ? session()->get("imageUrl") : "";
       $lineSpacing = session()->has("lineSpacing") ? session()->get("lineSpacing") : 0;
       $textJustification = session()->has("textJustification") ? session()->get("textJustification") : "center";
+      $showExtras = !auth()->user()->onBasicPlan();
+
       return view("formWithImageSelector", ["phrase" => $phrase, "fontName" => $fontName, "size" => $size,
       "imageLocation" => $imageLocation,
       "imageUrl" => $imageUrl,
       "lineSpacing" => $lineSpacing,
-      "textJustification" => $textJustification]);
+      "textJustification" => $textJustification,
+      "fonts" => Fonts::getFonts(auth()->user()->getCurrentStripePlanName()),
+      "showExtras" => $showExtras]);
     }
 
 }

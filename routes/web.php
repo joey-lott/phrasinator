@@ -18,8 +18,6 @@ use App\RPL\StraightOuttaImage;
 
 Route::get("/", function() { return redirect("/home");});
 
-//Route::get('/authorize', "PinAuthController@getToken");
-
 // Uncomment to use non-queued version
 //Route::post("/generate", "GeneratorController@generate");
 
@@ -37,51 +35,6 @@ Route::post('/straightoutta', function (Request $request) {
   return "<html><body><img src='".$uris["black"]."' width='280' height='300'><img src='".$uris["white"]."' width='280' height='300' style='background-color:black'></body></html>";
 });
 
-use App\RPL\TextImageV2;
-Route::get('/test', function(Request $request) {
-  $composite = new CompositeImage(1000, 1000);
-  $fontName = isset($request->fontName) ? $request->fontName : "knockout.ttf";
-  $phrase = isset($request->phrase) ? $request->phrase : "tesT [[[color=ff0000]]]ph[[[/color]]]rasE";
-  $image = new TextImageV2($phrase, $fontName, 1000, 1000);
-  $image->adjustFontToFillSpace();
-  $resource = $image->generateImageResource();
-  $composite->addAbove($resource);
-  $composite->setTransparent($image->transparent);
-  $path = $composite->saveToDisk($image->getFileName(), auth()->user()->id);
-  dd($path);
-//  return "<html><body><img src='images/{$path}'></body></html>";
-});
-
-use App\RPL\TextImageLayout;
-use App\RPL\TextToMarkup;
-Route::get('/test2', function(Request $request) {
-  $t2m = new TextToMarkup("this [[[color=ff0000]]]is[[[/color]]] a phrase");
-  $til = new TextImageLayout($t2m, base_path()."/fonts/knockout.ttf");
-  $image = imagecreatetruecolor(1,1);
-  $imgColor = imagecolorallocate($image, 0, 0, 0);
-  $x = 0;
-  $printText = "a";
-  $bBox = imagettftext($image, 100, 0, $x, 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
-  dump(($bBox[1] - $bBox[5]));
-  $printText = "b";
-  $bBox = imagettftext($image, 100, 0, $bBox[2], 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
-//  dump($bBox);
-  dump(($bBox[1] - $bBox[5]));
-  $printText = "g";
-  $bBox = imagettftext($image, 200, 0, $bBox[2], 0, $imgColor, base_path()."/fonts/knockout.ttf", $printText);
-  dump(($bBox[1] - $bBox[5]));
-
-});
-
-use Illuminate\Support\Facades\Storage;
-Route::get("/tests3", function() {
-  Storage::makeDirectory("test");
-  $directories = Storage::directories("/");
-  dd($directories);
-  $files = Storage::files("/");
-  dd($files);
-});
-
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -89,10 +42,32 @@ Route::get('/home', 'HomeController@index')->name('home');
 use App\ImagePaths;
 use App\Jobs\GenerateCompositeImage;
 
-Route::get('imageJob', function() {
-//   $user = auth()->user();
-// //  dump($user);
-//   $userId = $user->id;
-//   ImagePaths::where("userId", $userId)->delete();
-//   GenerateCompositeImage::dispatch(auth()->user()->id, 3000, 3000, "this is a test", "knockout.ttf", "none", null, 0, "center", base_path()."/public/images/".$userId."/");
+Route::get("subscribe", "SubscribeController@showPaymentForm");
+
+Route::post("subscribe", "SubscribeController@subscribe");
+
+Route::get('/account', 'AccountController@myAccount');
+Route::get('/account/welcome', 'AccountController@welcome');
+Route::get('/account/cancel', 'AccountController@cancelForm');
+Route::post('/account/cancel', 'SubscribeController@cancel');
+Route::post('/account/resume', 'SubscribeController@resume');
+Route::get('/account/change', 'SubscribeController@showChangePlanForm');
+Route::post('/account/change', 'SubscribeController@changePlan');
+
+use App\Fonts;
+
+Route::get("subscribeStatus", function() {
+//  $options = SubscriptionOptions::getOptions();
+//dump(auth()->user()->subscribed("phrasinator-basic-monthly"));
+  dump(auth()->user()->getCurrentSubscription());
+  // dump(auth()->user()->hasCardOnFile());
+  //dump(auth()->user()->onTrial("phrasinator-basic-monthly"));
+  // dump(auth()->user()->upcomingInvoice());
+  // dump(auth()->user()->defaultCard());
+//  dump(auth()->user()->onGracePeriodDefaultSubscription());
 });
+
+Route::post(
+    'stripe/webhook',
+    '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
+);
