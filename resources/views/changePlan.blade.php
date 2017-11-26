@@ -99,7 +99,7 @@ $(document).ready(function() {
     handlePaymentSubmit();
   });
 
-  stripe = Stripe("{{env("STRIPE_KEY")}}");
+  stripe = Stripe("{{$stripeKey}}");
 
   // This code inserts the strip form elements into the form
   elements = stripe.elements();

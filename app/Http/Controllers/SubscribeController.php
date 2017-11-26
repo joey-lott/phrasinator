@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
+use App\AppSecrets;
 class SubscribeController extends Controller
 {
 
@@ -18,6 +18,7 @@ class SubscribeController extends Controller
     }
 
     public function showPaymentForm() {
+      $stripeKey = AppSecrets::get("STRIPE_KEY");
       $couponError = false;
       $stripeErrorMessage = null;
       if(session()->has("stripeError")) {
@@ -29,10 +30,11 @@ class SubscribeController extends Controller
           $stripeErrorMessage = $message;
         }
       }
-      return view("subscribe", ["couponError" => $couponError, "stripeError" => $stripeErrorMessage]);
+      return view("subscribe", ["couponError" => $couponError, "stripeError" => $stripeErrorMessage, "stripeKey" => $stripeKey]);
     }
 
     public function showChangePlanForm() {
+      $stripeKey = AppSecrets::get("STRIPE_KEY");
       $planName = "Basic";
       $otherPlanName = "Plus";
       $otherPlanId = "phrasinator-plus-monthly";
@@ -43,7 +45,7 @@ class SubscribeController extends Controller
         $otherPlanId = "phrasinator-basic-monthly";
         $otherPlanPrice = "$9.99/month";
       }
-      return view("changePlan", ["planName" => $planName, "otherPlanName" => $otherPlanName, "otherPlanId" => $otherPlanId, "otherPlanPrice" => $otherPlanPrice, "planFormAction" => "/account/change"]);
+      return view("changePlan", ["planName" => $planName, "otherPlanName" => $otherPlanName, "otherPlanId" => $otherPlanId, "otherPlanPrice" => $otherPlanPrice, "planFormAction" => "/account/change", "stripeKey" => $stripeKey]);
     }
 
     public function subscribe(Request $request) {

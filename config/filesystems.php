@@ -1,4 +1,5 @@
 <?php
+use App\AppSecrets;
 
 return [
 
@@ -57,10 +58,10 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
+            'key' => AppSecrets::get('AWS_ACCESS_KEY_ID'),
+            'secret' => AppSecrets::get('AWS_SECRET_ACCESS_KEY'),
+            'region' => AppSecrets::get('AWS_DEFAULT_REGION'),
+            'bucket' => AppSecrets::get('AWS_BUCKET'),
         ],
 
         'dropbox' => [

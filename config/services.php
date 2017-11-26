@@ -1,4 +1,5 @@
 <?php
+use App\AppSecrets;
 
 return [
 
@@ -31,8 +32,8 @@ return [
 
     'stripe' => [
         'model' => App\User::class,
-        'key' => env('STRIPE_KEY'),
-        'secret' => env('STRIPE_SECRET'),
+        'key' => AppSecrets::get('STRIPE_KEY'),
+        'secret' => AppSecrets::get('STRIPE_SECRET'),
     ],
 
 ];

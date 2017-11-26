@@ -54,9 +54,10 @@ Route::post('/account/resume', 'SubscribeController@resume');
 Route::get('/account/change', 'SubscribeController@showChangePlanForm');
 Route::post('/account/change', 'SubscribeController@changePlan');
 
-use App\Fonts;
+use App\AppSecrets;
 
 Route::get("subscribeStatus", function() {
+  dd(AppSecrets::get("AWS_ACCESS_KEY_ID"));
 //  $options = SubscriptionOptions::getOptions();
 //dump(auth()->user()->subscribed("phrasinator-basic-monthly"));
   dump(auth()->user()->getCurrentSubscription());
