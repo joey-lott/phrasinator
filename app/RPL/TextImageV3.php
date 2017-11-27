@@ -25,8 +25,8 @@ class TextImageV3 {
   private $textJustification;
   private $basePath;
 
-  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1, $textJustification = "center") {
-    $this->basePath = base_path()."/";
+  public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1, $textJustification = "center", $basePath = "") {
+    $this->basePath = $basePath;
 
     $this->text = $text;
     $this->font = $font;

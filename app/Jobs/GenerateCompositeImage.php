@@ -65,6 +65,9 @@ class GenerateCompositeImage implements ShouldQueue
      */
     public function handle()
     {
+
+
+
       // Check to see if this is the latest job for this user. If not,
       // return early.
       $latest = UserLatestJobTime::where("userId", $this->userId)->get()->last();
@@ -107,7 +110,7 @@ class GenerateCompositeImage implements ShouldQueue
     }
 
     private function makeComposite($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $fileNameUniqueSuffix, $color, $lineSpacing, $textJustification, $basePath) {
-      $composite = new CompositeImageV2($width, $height, $this->userId);
+      $composite = new CompositeImageV2($width, $height, $this->userId, $basePath);
 
       // If image location was set to above or below (not none), try to grab the image
       if($imageLocation == "above" || $imageLocation == "below") {
@@ -124,7 +127,7 @@ class GenerateCompositeImage implements ShouldQueue
       ini_set('max_execution_time', 60);
 
       // Generate the text image
-      $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
+      $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification, $basePath);
       $image->adjustFontToFillSpace();
       $image->generateImageResource();
       $imageData = $image->saveToDisk($this->userId."_tmp_text");

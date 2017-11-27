@@ -30,12 +30,17 @@ class GeneratorController extends Controller
       // Delete all the paths from previous jobs.
       ImagePaths::where("userId", $userId)->delete();
 
-      $imagePath = base_path()."/public/images/".$userId."/";
-
-      // First, delete the user's files directory
+      // First, delete the user's files directory on s3 (default storage)
       Storage::deleteDirectory($userId);
-      // Then, create the directory for the user
+      // Then, create the directory for the user on s3
       Storage::makeDirectory($userId);
+
+      // Next, make sure the local temp directory exists
+      Storage::disk("local")->makeDirectory("temp");
+
+
+      // This is the path to the temp directory
+      $imagePath = base_path()."/storage/app/temp/";
 
       $size = $request->size;
       $width = 3000;

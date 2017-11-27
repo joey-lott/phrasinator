@@ -84,10 +84,14 @@ Route::get("/test", function() {
   $imageLocation = "above";
   $pixabayImage= "https://pixabay.com/get/eb30b20f28f7003ed95c4518b74d479eeb7ee2dc04b0144094f8c179a7e9b7_960.png";
   $textJustification = "center";
-  $basePath = "/home/vagrant/Code/phrasinator/public/images/1/";
+  Storage::disk("local")->makeDirectory("temp");
+  $tempPath = Storage::disk("local")->url("temp");
+  dump($tempPath);
+  $imagePath = base_path()."/storage/app/temp/";
+  dump($imagePath);
   $g = new GenerateCompositeImage(1, $width, $height, $phrase, $fontName,
                               $imageLocation, $pixabayImage, $lineSpacing,
-                              $textJustification, $basePath);
+                              $textJustification, $imagePath);
   $url = $g->handle();
   return;
   $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
