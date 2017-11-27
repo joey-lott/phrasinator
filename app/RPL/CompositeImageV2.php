@@ -14,10 +14,13 @@ class CompositeImageV2 {
   private $images = [];
   private $compositeImage;
   private $uniqueId;
+  private $basePath;
 
   public function __construct($width = 3000, $height = 3000, $uniqueId = "") {
     $this->imageWidth = $width;
     $this->imageHeight = $height;
+
+    $this->basePath = base_path()."/";
 
     // Adjust the vertical spacing relative to the height
     $this->verticalSpacing *= ($height / 3000);
@@ -39,7 +42,7 @@ class CompositeImageV2 {
   }
 
   public function saveImageToDisk($image, $name) {
-    $tmpPath = base_path();
+    $tmpPath = $this->basePath;
     $image->writeImage($tmpPath.$name);
   }
 
@@ -84,7 +87,7 @@ class CompositeImageV2 {
       $x = ($this->imageWidth - $w) / 2;
 
       // Get the image from disk
-      $path = base_path().$image["name"];
+      $path = $this->basePath.$image["name"];
       $handle = fopen($path, 'rb');
       $image = new \Imagick();
       $image->readImageFile($handle);
@@ -99,11 +102,11 @@ class CompositeImageV2 {
 
     $name = $fileName.".png";
 
-    $tmpPath = base_path();
+    $tmpPath = $this->basePath;
 
 // need to make this file name unique...add the user ID
     // Save a temp file locally.
-    $compositeImage->writeImage($tmpPath."/temp.png");
+    $compositeImage->writeImage($tmpPath."temp.png");
 
     // Upload the temp file to s3
     $storedFile = Storage::putFileAs($path, new File($tmpPath."/temp.png"), $name, "public");

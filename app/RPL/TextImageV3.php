@@ -23,8 +23,11 @@ class TextImageV3 {
   // Store the height of one line of text - text only, no line spacing
   private $lineTextHeight;
   private $textJustification;
+  private $basePath;
 
   public function __construct($text, $font, $width = null, $height = null, $defaultTextColor = null, $lineSpacing = 0.1, $textJustification = "center") {
+    $this->basePath = base_path()."/";
+
     $this->text = $text;
     $this->font = $font;
     $this->textToMarkup = new TextToMarkup($text, $defaultTextColor);
@@ -242,7 +245,7 @@ class TextImageV3 {
     $image = $this->imageResource;
 
     $name = $fileName.".png";
-    $this->imageResource->writeImage(base_path().$name);
+    $this->imageResource->writeImage($this->basePath.$name);
 
     return ["name" => $name, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
   }
