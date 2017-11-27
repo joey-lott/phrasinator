@@ -68,6 +68,70 @@ Route::get("subscribeStatus", function() {
 //  dump(auth()->user()->onGracePeriodDefaultSubscription());
 });
 
+
+use App\RPL\TextImageV3;
+use App\RPL\Color;
+use App\RPL\CompositeImageV2;
+
+Route::get("/test", function() {
+  $phrase = "the good quick [[[color=ff2929]]]brown[[[/color]]] fox jumped over the lazy dog";
+  $fontName = "shadowsintolight.ttf";
+  $width = 3000;
+  $height = 3000;
+  $heightRemaining = 1000;
+  $color = new Color("000000");
+  $lineSpacing = "0.17";
+  $imageLocation = "above";
+  $pixabayImage= "https://pixabay.com/get/eb30b20f28f7003ed95c4518b74d479eeb7ee2dc04b0144094f8c179a7e9b7_960.png";
+  $textJustification = "center";
+  $basePath = "/home/vagrant/Code/phrasinator/public/images/1/";
+  $g = new GenerateCompositeImage(1, $width, $height, $phrase, $fontName,
+                              $imageLocation, $pixabayImage, $lineSpacing,
+                              $textJustification, $basePath);
+  $url = $g->handle();
+  return;
+  $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
+  $image->adjustFontToFillSpace();
+  $resource = $image->generateImageResource();
+// $image->saveImage("test2");
+// return "<img src='images/test2.png'>";
+ $composite = new CompositeImageV2(3000, 3000);
+
+  $composite->fetchFromUrl("https://cdn.pixabay.com/photo/2017/11/22/22/53/nuts-2971675_960_720.jpg");
+  $heightRemaining = $composite->fetchHeightRemaining();
+  $composite->addBelow($resource);
+  $url = $composite->saveToDisk("test.png", "test");
+  return "<img src='{$url}'>";
+  // $font = "comingsoon.ttf";
+  $font = base_path()."/fonts/".$fontName;
+  $img = new \Imagick();
+  $img->newImage(1000, 1000, "none");
+  $draw = new ImagickDraw();
+  $draw->setFont($font);
+  $draw->setFillColor('black');
+  $draw->setFontSize( 100 );
+  $printText = "g";
+  $metrics = $img->queryFontMetrics($draw, $printText);
+  $x = $metrics["originX"];
+  dump($metrics);
+  $img->annotateImage($draw, 0, $metrics["ascender"], 0, $printText);
+  $printText = "H";
+
+  $metrics = $img->queryFontMetrics($draw, $printText);
+  $totalWidth = $x + $metrics["originX"];
+
+  dump($metrics);
+  $img->annotateImage($draw, $x, $metrics["ascender"], 0, $printText);
+  $img->writeImage(base_path()."/public/images/test.png");
+  dump($totalWidth);
+  $metrics = $img->queryFontMetrics($draw, "gH");
+  dump($metrics);
+  $width = $metrics["textWidth"];
+  return "<img src='images/test.png'>";
+  // $red = imagecolorallocate($image, 254, 1, 1);
+
+});
+
 Route::post(
     'stripe/webhook',
     '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'

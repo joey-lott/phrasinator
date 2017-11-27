@@ -11,12 +11,31 @@
                 <div class="panel-body">
 
 
+                  <!-- Commenting this out for now because
+                       the preview generation won't work until
+                       I fix how the composite image gets created.
+                       right now the size of the composite image
+                       doesn't shrink or grow the entire contents.
+
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <img id="preview" width='200' height='200' border='1' style="border: 1px solid #000">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <form action="/" id="preview-form">
+                        <button>preview</button>
+                      </form>
+                    </div>
+                  </div>
+                -->
       <form method="post" action="/generate">
         {{csrf_field()}}
         <div class="row form-group">
           <label class="col-md-2 form-group">font style:</label>
           <div class="col-md-10">
-            <select name="fontName" class="form-control">
+            <select name="fontName" id="fontName" class="form-control">
               @foreach($fonts as $font)
                 <option value="{{$font->file}}"<?php if($fontName == $font->file) echo " selected"; ?>>{{$font->label}}</option>
               @endforeach
@@ -26,7 +45,7 @@
         <div class="row form-group">
           <label class="form-group col-md-2">Phrase:</label>
           <div class="col-md-10">
-            <input type="text" name="phrase" class="form-control" value="{{$phrase}}">
+            <input type="text" name="phrase" id="phrase" class="form-control" value="{{$phrase}}">
           </div>
         </div>
 
@@ -51,23 +70,23 @@
         <div class="row form-group">
           <label class="form-group col-md-2">Line Spacing:</label>
           <div class="col-md-10">
-            <input type="range" name="lineSpacing" class="form-control" min="-0.5" max=".5" step="0.01" value="{{$lineSpacing}}">
+            <input type="range" name="lineSpacing" id="lineSpacing" class="form-control" min="-0.5" max=".5" step="0.01" value="{{$lineSpacing}}">
           </div>
         </div>
 
         <div class="row form-group">
           <label class="form-group col-md-2">Text Justification:</label>
           <div class="col-md-10">
-              <input type="radio" name="textJustification" value="left"<?php if($textJustification == "left") echo " checked";?>> Left
-              <input type="radio" name="textJustification" value="center"<?php if($textJustification == "center") echo " checked";?>> Center
-              <input type="radio" name="textJustification" value="right"<?php if($textJustification == "right") echo " checked";?>> Right
+              <input type="radio" name="textJustification" id="align-left" value="left"<?php if($textJustification == "left") echo " checked";?>> Left
+              <input type="radio" name="textJustification" id="align-center" value="center"<?php if($textJustification == "center") echo " checked";?>> Center
+              <input type="radio" name="textJustification" id="align-right" value="right"<?php if($textJustification == "right") echo " checked";?>> Right
           </div>
         </div>
 
         <div class="row form-group">
           <label class="form-group col-md-2">Pixabay Image Location:</label>
           <div class="col-md-10">
-            <select name="imageLocation" class="form-control">
+            <select name="imageLocation" id="imageLocation" class="form-control">
               <option>none</option>
               <option<?php if($imageLocation == "above") echo " selected"; ?>>above</option>
               <option<?php if($imageLocation == "below") echo " selected"; ?>>below</option>
@@ -91,7 +110,7 @@
         <div class="row form-group" id="images">
           @if($imageUrl != "")
             <img src="{{$imageUrl}}" width="100">
-            <input type="hidden" name="pixabayImage" value="{{$imageUrl}}">
+            <input type="hidden" name="pixabayImage" id="pixabayImage" value="{{$imageUrl}}">
           @endif
         </div>
         <div class="row form-group">
@@ -121,6 +140,57 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+
+// Wait until the document is ready...
+$(document).ready(function() {
+
+  var form = $('#preview-form');
+  // Handle the form submit for the payment form...
+  form.submit(function(event) {
+    var userId = {{$userId}};
+    var phrase = $("#phrase").val();
+    var fontName = $("#fontName").val();
+    var imageLocation = $("#imageLocation").val();
+    var pixabayImage = $("#pixabayImage").val();
+    if(typeof(pixabayImage) === "undefined") {
+      // It might me undefined if the user ran a search instead of using a session-stored image URL
+      // So look for radiobuttons...
+      var radioVal = $("input[name=pixabayImage]:checked").val();
+      if(typeof(radioVal) !== "undefined") {
+        pixabayImage = radioVal;
+      }
+    }
+    var lineSpacing = $("#lineSpacing").val();
+    var textJustification;
+    if($("#align-center").attr("checked") == "checked") textJustification = "center";
+    else if($("#align-left").attr("checked") == "checked") textJustification = "left";
+    if($("#align-center").attr("checked") == "checked") textJustification = "right";
+    console.log(userId, phrase, fontName, imageLocation, pixabayImage, lineSpacing, textJustification);
+    event.preventDefault();
+    var url = "/api/generate-preview?userId="+userId+"&phrase="+phrase+"&fontName="+fontName+"&imageLocation="+imageLocation+"&lineSpacing="+lineSpacing+"&textJustification="+textJustification;
+    if(typeof(pixabayImage) !== "undefined") url += "&pixabayImage="+pixabayImage;
+    $.get(url, function(response) {
+      // Start a timeout to check for the images
+      setTimeout(testForImages, 1000);
+    });
+  });
+});
+
+function testForImages() {
+
+  url = "/api/get-image-paths/{{$userId}}";
+  $.get(url, handleImagePathResults);
+}
+
+function handleImagePathResults(response) {
+  console.log(response);
+  if(response.length < 2) {
+    setTimeout(testForImages, 2000);
+  }
+  else {
+    $("#preview").attr("src", response[0].imagePath);
+  }
+}
 
   // The page number for pixabay searches. Default to 1 for first page.
   let page = 1;

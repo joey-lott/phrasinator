@@ -7,8 +7,10 @@ class Color {
   public $red;
   public $green;
   public $blue;
+  public $hexString;
 
   public function __construct($hexString = null) {
+    $this->hexString = $hexString;
     // If the parameter is set, use it. Otherwise, generate a random color.
     if(isset($hexString)) {
       $dec = hexdec($hexString);
@@ -24,6 +26,11 @@ class Color {
       $this->blue = rand(1, 254);
       $this->green = rand(1, 254);
     }
+  }
+
+  public function getHexString() {
+    if(strlen($this->hexString) == 6) return $this->hexString;
+    return "000000";
   }
 
   public function getInverse() {

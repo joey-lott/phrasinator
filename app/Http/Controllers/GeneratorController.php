@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\RPL\TextImageV2;
-use App\RPL\CompositeImage;
+use App\RPL\TextImageV3;
+use App\RPL\CompositeImageV2;
 use App\RPL\Color;
 use App\ImagePaths;
 use App\Jobs\GenerateCompositeImage;
@@ -19,8 +19,8 @@ class GeneratorController extends Controller
     //
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('subscribed');
+        $this->middleware('auth')->except("generatePreview");
+        $this->middleware('subscribed')->except("generatePreview");
     }
 
     public function generateQueuedImageJob(Request $request) {
@@ -66,7 +66,33 @@ class GeneratorController extends Controller
 
     }
 
-    public function generate(Request $request) {
+
+    // Called as API endpoint
+    public function generatePreview(Request $request) {
+
+      $userId = $request->userId;
+
+      // Delete all the paths from previous jobs.
+      ImagePaths::where("userId", $userId)->delete();
+
+      $imagePath = base_path()."/public/images/".$userId."/";
+
+      // First, delete the user's files directory
+      Storage::deleteDirectory($userId);
+      // Then, create the directory for the user
+      Storage::makeDirectory($userId);
+
+      $width = 1000;
+      $height = 1000;
+
+      ImagePaths::where("userId", $userId)->delete();
+      GenerateCompositeImage::dispatch($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath);
+
+      return ["status" => "ok", "userId" => $userId, "width" => $width, "height" => $height, "phrase" => $request->phrase, "fontName" => $request->fontName, "pixabayImage" => $request->pixabayImage, "lineSpacing" => $request->lineSpacing, "textJustification" => $request->textJustification, "imagePath" => $imagePath];
+
+    }
+
+/*    public function generate(Request $request) {
 
       // First, delete all images in the images folder
       $files = glob(base_path()."/public/images/*");
@@ -128,7 +154,7 @@ class GeneratorController extends Controller
 
 
       // Generate the text image
-      $image = new TextImageV2($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
+      $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
       $image->adjustFontToFillSpace();
       $resource = $image->generateImageResource();
 
@@ -148,7 +174,7 @@ class GeneratorController extends Controller
       $path = $composite->saveToDisk($image->getFileName()."".$fileNameUniqueSuffix);
       return $path;
     }
-
+*/
     public function form(Request $request) {
 
       // If "clear=now" is passed through the request, clear
@@ -179,7 +205,8 @@ class GeneratorController extends Controller
       "lineSpacing" => $lineSpacing,
       "textJustification" => $textJustification,
       "fonts" => Fonts::getFonts(auth()->user()->getCurrentStripePlanName()),
-      "showExtras" => $showExtras]);
+      "showExtras" => $showExtras,
+      "userId" => auth()->user()->id]);
     }
 
 }
