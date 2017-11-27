@@ -12,37 +12,52 @@ class CompositeImageV2 {
   private $verticalSpacing = 50;
   private $transparencyColor;
   private $images = [];
+  private $compositeImage;
+  private $uniqueId;
 
-  public function __construct($width = 3000, $height = 3000) {
+  public function __construct($width = 3000, $height = 3000, $uniqueId = "") {
     $this->imageWidth = $width;
     $this->imageHeight = $height;
 
     // Adjust the vertical spacing relative to the height
     $this->verticalSpacing *= ($height / 3000);
+
+    $this->uniqueId = $uniqueId;
   }
 
   public function fetchFromUrl($url) {
     $handle = fopen($url, 'rb');
     $image = new \Imagick();
     $image->readImageFile($handle);
-    $this->images[] = $image;
+    fclose($handle);
+    $height = $image->getImageHeight();
+    $width = $image->getImageWidth();
+    $name = $this->uniqueId."_tmp_pixabay.png";
+    $this->saveImageToDisk($image, $name);
+    $image->destroy();
+    $this->images[] = ["name" => $name, "height" => $height, "width" => $width];
+  }
+
+  public function saveImageToDisk($image, $name) {
+    $tmpPath = base_path();
+    $image->writeImage($tmpPath.$name);
   }
 
   public function fetchHeightRemaining() {
     $heightRemaining = $this->imageHeight;
     foreach($this->images as $image) {
         // Subtract the image resource height;
-        $heightRemaining -= $image->getImageHeight() + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier));
+        $heightRemaining -= $image["height"] + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier));
     }
     return $heightRemaining;
   }
 
-  public function addAbove($imageResource) {
-    array_unshift($this->images, $imageResource);
+  public function addAbove($imageData) {
+    array_unshift($this->images, $imageData);
   }
 
-  public function addBelow($imageResource) {
-    array_push($this->images, $imageResource);
+  public function addBelow($imageData) {
+    array_push($this->images, $imageData);
   }
 
   public function saveToDisk($fileName, $path = null) {
@@ -56,8 +71,7 @@ class CompositeImageV2 {
     $totalHeight = 0;
 
     foreach($this->images as $image) {
-      $h = $image->getImageHeight();
-dump($h);
+      $h = $image["height"];
       $totalHeight += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
     $totalHeight -= $this->verticalSpacing;
@@ -65,11 +79,21 @@ dump($h);
     $y = ($this->imageHeight - $totalHeight) / 2;
 
     foreach($this->images as $image) {
-      $w = $image->getImageWidth();
-      $h = $image->getImageHeight();
+      $w = $image["width"];
+      $h = $image["height"];
       $x = ($this->imageWidth - $w) / 2;
-      //$compositeImage->setGravity(\imagick::GRAVITY_CENTER);
+
+      // Get the image from disk
+      $path = base_path().$image["name"];
+      $handle = fopen($path, 'rb');
+      $image = new \Imagick();
+      $image->readImageFile($handle);
+      fclose($handle);
+
+      // Add the image to the composite.
       $compositeImage->compositeImage($image, \imagick::COMPOSITE_DEFAULT, $x, $y);
+      // destroy it from memory
+      $image->destroy();
       $y += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
 
@@ -77,6 +101,7 @@ dump($h);
 
     $tmpPath = base_path();
 
+// need to make this file name unique...add the user ID
     // Save a temp file locally.
     $compositeImage->writeImage($tmpPath."/temp.png");
 

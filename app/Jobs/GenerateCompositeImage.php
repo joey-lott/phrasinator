@@ -107,7 +107,7 @@ class GenerateCompositeImage implements ShouldQueue
     }
 
     private function makeComposite($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $fileNameUniqueSuffix, $color, $lineSpacing, $textJustification, $basePath) {
-      $composite = new CompositeImageV2($width, $height);
+      $composite = new CompositeImageV2($width, $height, $this->userId);
 
       // If image location was set to above or below (not none), try to grab the image
       if($imageLocation == "above" || $imageLocation == "below") {
@@ -126,7 +126,9 @@ class GenerateCompositeImage implements ShouldQueue
       // Generate the text image
       $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
       $image->adjustFontToFillSpace();
-      $resource = $image->generateImageResource();
+      $image->generateImageResource();
+      $imageData = $image->saveToDisk($this->userId."_tmp_text");
+      $image->destroy();
 
       // Add the text images to the composite images. The language here is
       // confusing because the form asks for the *image* (i.e. pixabay image)
@@ -134,10 +136,10 @@ class GenerateCompositeImage implements ShouldQueue
       // to the composite. So if imageLocation is "above", call addBelow(),
       // and vice versa.
       if($imageLocation == "above") {
-        $composite->addBelow($resource);
+        $composite->addBelow($imageData);
       }
       else {
-        $composite->addAbove($resource);
+        $composite->addAbove($imageData);
       }
       $fileName = $image->getFileName();
       $path = $composite->saveToDisk($fileName."".$fileNameUniqueSuffix, $this->userId);

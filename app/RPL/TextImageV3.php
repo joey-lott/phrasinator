@@ -235,21 +235,21 @@ class TextImageV3 {
     return $image;
   }
 
-  public function saveImage($name) {
+  public function saveToDisk($name) {
 
     $fileName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
 
     $image = $this->imageResource;
 
     $name = $fileName.".png";
-    $this->imageResource->writeImage(base_path()."/public/images/".$name);
+    $this->imageResource->writeImage(base_path().$name);
 
-    return $name;
+    return ["name" => $name, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
   }
 
-  public function destroyResources() {
+  public function destroy() {
     $image = $this->imageResource;
-    imagedestroy($image);
+    $image->destroy();
   }
 
 }
