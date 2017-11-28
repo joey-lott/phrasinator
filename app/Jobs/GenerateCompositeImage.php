@@ -70,6 +70,9 @@ class GenerateCompositeImage implements ShouldQueue
         mkdir($this->basePath);
       }
 
+      dump($this->basePath);
+      dump(getcwd());
+
       // Check to see if this is the latest job for this user. If not,
       // return early.
       $latest = UserLatestJobTime::where("userId", $this->userId)->get()->last();
