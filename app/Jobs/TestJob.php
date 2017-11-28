@@ -34,8 +34,8 @@ class TestJob implements ShouldQueue
     {
 
 
-      $this->basePath = getcwd()."/";
-      dump($this->basePath);
+      $this->basePath = getcwd();
+      dump(scandir($this->basePath));
 
       dblog($this->basePath, "test job output");
 
