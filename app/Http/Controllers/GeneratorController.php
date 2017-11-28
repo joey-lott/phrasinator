@@ -36,8 +36,9 @@ class GeneratorController extends Controller
       Storage::makeDirectory($userId);
 
       // This is the path to the temp directory
-      $imagePath = base_path()."/storage/app/temp/";
-
+      //$imagePath = base_path()."/storage/app/temp/";
+      $imagePath = "temp/";
+      
       $size = $request->size;
       $width = 3000;
       $height = 3000;
