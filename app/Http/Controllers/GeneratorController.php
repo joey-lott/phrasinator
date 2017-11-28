@@ -31,7 +31,7 @@ class GeneratorController extends Controller
       ImagePaths::where("userId", $userId)->delete();
 
       // First, delete the user's files directory on s3 (default storage)
-      Storage::deleteDirectory($userId);
+      if(Storage::exists($userId)) Storage::deleteDirectory($userId);
       // Then, create the directory for the user on s3
       Storage::makeDirectory($userId);
 

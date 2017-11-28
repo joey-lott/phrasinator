@@ -72,7 +72,13 @@ class GenerateCompositeImage implements ShouldQueue
     {
       dblog("GenerateCompositImage->handle()", "job queue");
 
-      $this->basePath = getcwd()."/";
+
+      $p = getcwd();
+      // If the last character of the path is not a /, add one.
+      if(substr($p, strlen($p)-1) != "/") {
+        $p .= "/";
+      }
+      $this->basePath = $p;
 
       // Check to see if this is the latest job for this user. If not,
       // return early.
