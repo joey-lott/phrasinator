@@ -94,8 +94,6 @@ class CompositeImageV2 {
       $image = new \Imagick();
       $image->readImageFile($handle);
       fclose($handle);
-      // Delete the temp file
-//      unlink($path);
 
       dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "retrieved temp image memory");
 
@@ -111,18 +109,14 @@ class CompositeImageV2 {
     $name = $fileName.".png";
 
     $tmpPath = $this->basePath;
+    $compositeImage->setImageFormat("png");
 
-    // Save a temp file locally.
-    $compositeImage->writeImage($tmpPath.$this->uniqueId."_temp.png");
+    // Put directly on S3
+    $storedFile = Storage::put($this->uniqueId."/".$name, $compositeImage->getImageBlob(), "public");
+
     $compositeImage->clear();
 
-    // Upload the temp file to s3
-    $storedFile = Storage::putFileAs($path, new File($tmpPath.$this->uniqueId."_temp.png"), $name, "public");
-
-    $url = Storage::url($storedFile);
-
-    // Delete the temp file
-  //  unlink($path);
+    $url = env("AWS_BASE_URL").$this->uniqueId."/".$name;
 
     dblog(($compositeImage->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "composite image memory after destroy");
 
