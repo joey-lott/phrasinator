@@ -43,7 +43,11 @@ class GenerateCompositeImage implements ShouldQueue
       $this->pixabayImage = $pixabayImage;
       $this->lineSpacing = $lineSpacing;
       $this->textJustification = $textJustification;
-      $this->basePath = $basePath;
+
+      // This wasn't working on fortrabbit. It worked locally, so there's
+      // a difference between how jobs are run locally versus on forrabbit
+      // (obviously). For now, set basePath in handle() instead.
+      //$this->basePath = $basePath;
 
 
       $this->timeQueued = Carbon::now();
@@ -66,12 +70,11 @@ class GenerateCompositeImage implements ShouldQueue
     public function handle()
     {
 
-      if(!file_exists($this->basePath)) {
-        mkdir($this->basePath);
-      }
+      $this->basePath = getcwd();
 
-      dump($this->basePath);
-      dump(getcwd());
+      // if(!file_exists($this->basePath)) {
+      //   mkdir($this->basePath);
+      // }
 
       // Check to see if this is the latest job for this user. If not,
       // return early.
