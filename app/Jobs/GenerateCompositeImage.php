@@ -157,6 +157,7 @@ class GenerateCompositeImage implements ShouldQueue
       }
       $fileName = $image->getFileName();
       $path = $composite->saveToDisk($fileName."".$fileNameUniqueSuffix, $this->userId);
+      dblog($path, "saved composite");
       return ["path" => $path, "fileName" => $fileName];
     }
 

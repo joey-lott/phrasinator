@@ -230,16 +230,15 @@ class TextImageV3 {
   }
 
   public function saveToDisk($name) {
-
+    // Now ignoring $name. Can refactor.
     $fileName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
 
     $image = $this->imageResource;
+    $tmpPath = storage_path("temp_text.png");
+    dump("writing temp text ".$tmpPath);
+    $this->imageResource->writeImage($tmpPath);
 
-    $name = $fileName.".png";
-    dblog("{$this->basePath}{$name}", "text image temp file (attempt)");
-    $this->imageResource->writeImage($this->basePath.$name);
-    dblog("{$this->basePath}{$name}", "text image write to disk");
-    return ["name" => $name, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
+    return ["name" => $tmpPath, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
   }
 
   public function destroy() {

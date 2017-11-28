@@ -35,16 +35,16 @@ class CompositeImageV2 {
     fclose($handle);
     $height = $image->getImageHeight();
     $width = $image->getImageWidth();
-    $name = $this->uniqueId."_tmp_pixabay.png";
-    $this->saveImageToDisk($image, $name);
+    $name = $this->saveImageToDisk($image);
     $image->destroy();
     $this->images[] = ["name" => $name, "height" => $height, "width" => $width];
   }
 
-  public function saveImageToDisk($image, $name) {
-    $tmpPath = $this->basePath;
-    dblog("{$tmpPath}{$name}", "write pixabay image to disk");
-    $image->writeImage($tmpPath.$name);
+  public function saveImageToDisk($image) {
+    $tmpPath = storage_path("temp_pixabay.png");
+    dblog("{$tmpPath}", "write pixabay image to disk");
+    $image->writeImage($tmpPath);
+    return $tmpPath;
   }
 
   public function fetchHeightRemaining() {
@@ -89,8 +89,9 @@ class CompositeImageV2 {
       $x = ($this->imageWidth - $w) / 2;
 
       // Get the image from disk
-      $path = $this->basePath.$image["name"];
+      $path = $image["name"];
       $handle = fopen($path, 'rb');
+      dblog($path, "opening temp image");
       $image = new \Imagick();
       $image->readImageFile($handle);
       fclose($handle);
