@@ -95,7 +95,7 @@ class CompositeImageV2 {
       $image->readImageFile($handle);
       fclose($handle);
       // Delete the temp file
-      unlink($path);
+//      unlink($path);
 
       dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "retrieved temp image memory");
 
@@ -122,7 +122,7 @@ class CompositeImageV2 {
     $url = Storage::url($storedFile);
 
     // Delete the temp file
-    unlink($path);
+  //  unlink($path);
 
     dblog(($compositeImage->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "composite image memory after destroy");
 
