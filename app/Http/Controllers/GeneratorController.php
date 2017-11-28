@@ -35,10 +35,6 @@ class GeneratorController extends Controller
       // Then, create the directory for the user on s3
       Storage::makeDirectory($userId);
 
-      // Next, make sure the local temp directory exists
-      Storage::disk("local")->makeDirectory("temp");
-
-
       // This is the path to the temp directory
       $imagePath = base_path()."/storage/app/temp/";
 

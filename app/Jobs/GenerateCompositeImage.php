@@ -66,7 +66,9 @@ class GenerateCompositeImage implements ShouldQueue
     public function handle()
     {
 
-
+      if(!file_exists($this->basePath)) {
+        mkdir($this->basePath);
+      }
 
       // Check to see if this is the latest job for this user. If not,
       // return early.
