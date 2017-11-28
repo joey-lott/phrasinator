@@ -13,6 +13,7 @@ use App\RPL\CompositeImageV2;
 use App\RPL\Color;
 use App\UserLatestJobTime;
 use Carbon\Carbon;
+use App\AppSecrets;
 
 class GenerateCompositeImage implements ShouldQueue
 {
@@ -70,11 +71,7 @@ class GenerateCompositeImage implements ShouldQueue
     public function handle()
     {
 
-      $this->basePath = getcwd();
-
-      // if(!file_exists($this->basePath)) {
-      //   mkdir($this->basePath);
-      // }
+      $this->basePath = getcwd()."/";
 
       // Check to see if this is the latest job for this user. If not,
       // return early.
@@ -82,9 +79,8 @@ class GenerateCompositeImage implements ShouldQueue
 
 
       if($this->timeQueued == $latest->latestJobTime) {
-        return $this->runImageCreation();
+        $this->runImageCreation();
       }
-
     }
 
     private function getPathAndFile($path, $file) {

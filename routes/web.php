@@ -55,6 +55,16 @@ Route::get('/account/change', 'SubscribeController@showChangePlanForm');
 Route::post('/account/change', 'SubscribeController@changePlan');
 
 use App\AppSecrets;
+use App\DbLog;
+
+Route::get("/log-view", function() {
+  $logs = DbLog::orderBy("created_at", "desc")->get()->all();
+  echo "<ul>";
+  foreach($logs as $log) {
+    echo "<li>{$log->context}, {$log->message}, {$log->created_at}</li>";
+  }
+  echo "</ul>";
+});
 
 Route::get("subscribeStatus", function() {
   dd(AppSecrets::get("AWS_ACCESS_KEY_ID"));
@@ -82,7 +92,7 @@ Route::get("/test", function() {
   $color = new Color("000000");
   $lineSpacing = "0.17";
   $imageLocation = "above";
-  $pixabayImage= "https://pixabay.com/get/eb30b20f28f7003ed95c4518b74d479eeb7ee2dc04b0144094f8c179a7e9b7_960.png";
+  $pixabayImage= "https://cdn.pixabay.com/photo/2017/11/22/22/53/nuts-2971675_960_720.jpg";
   $textJustification = "center";
   Storage::disk("local")->makeDirectory("temp");
   $tempPath = Storage::disk("local")->url("temp");

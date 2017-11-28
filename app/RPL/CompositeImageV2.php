@@ -43,6 +43,7 @@ class CompositeImageV2 {
 
   public function saveImageToDisk($image, $name) {
     $tmpPath = $this->basePath;
+    dblog("{$tmpPath}{$name}", "write pixabay image to disk");
     $image->writeImage($tmpPath.$name);
   }
 
@@ -93,11 +94,17 @@ class CompositeImageV2 {
       $image = new \Imagick();
       $image->readImageFile($handle);
       fclose($handle);
+      // Delete the temp file
+      unlink($path);
+
+      dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "retrieved temp image memory");
 
       // Add the image to the composite.
       $compositeImage->compositeImage($image, \imagick::COMPOSITE_DEFAULT, $x, $y);
+      dblog(($compositeImage->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "composite image memory");
       // destroy it from memory
-      $image->destroy();
+      $image->clear();
+      dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "retrieved temp image memory after being destroyed");
       $y += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
 
@@ -107,11 +114,17 @@ class CompositeImageV2 {
 
     // Save a temp file locally.
     $compositeImage->writeImage($tmpPath.$this->uniqueId."_temp.png");
+    $compositeImage->clear();
 
     // Upload the temp file to s3
     $storedFile = Storage::putFileAs($path, new File($tmpPath.$this->uniqueId."_temp.png"), $name, "public");
 
     $url = Storage::url($storedFile);
+
+    // Delete the temp file
+    unlink($path);
+
+    dblog(($compositeImage->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "composite image memory after destroy");
 
     return $url;
   }

@@ -18,7 +18,8 @@ class AppSecrets {
   static public function get($key) {
     $as = new AppSecrets();
     $as->getSecrets();
-    return $as->getSecret($key);
+    $secret = $as->getSecret($key);
+    return $secret;
   }
 
 

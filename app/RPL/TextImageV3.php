@@ -187,8 +187,6 @@ class TextImageV3 {
     $draw->setFont($this->getFullFont());
     $draw->setFontSize( $this->fontSize );
 
-//    $markedUpCharacterIndex = 0;
-
     // Get the width of the longest line of text to calculate the positions
     // of text when right or left justified.
     $longestLine = $this->layout->getLongestLine();
@@ -202,7 +200,7 @@ class TextImageV3 {
       $line = $lines[$i];
       $string = $this->convertCharsToString($line);
       $metrics = $this->getMetricsForString($string);
-      $lineWidth = $metrics["textWidth"];
+      $lineWidth = $metrics["originX"];
 
       switch($this->textJustification) {
         case "left":
@@ -218,22 +216,15 @@ class TextImageV3 {
       foreach($line as $char) {
         $c = $char->character;
         $metrics = $image->queryFontMetrics($draw, $c);
-        //dump("#".$char->color->getHexString());
+
         $draw->setFillColor("#".$char->color->getHexString());
         $image->annotateImage($draw, $x, $y + $metrics["ascender"], 0, $c);
         $x += $metrics["originX"];
       }
-      $y += $metrics["textHeight"];
-      // This is the x position of the first word in the line
-
-//      imagecopy($image, $lineImage["image"], $x, $currentY, 0, 0, $lineImage["width"], $eachLineHeight);
-//      imagedestroy($lineImage["image"]);
-
-      // $this->lineHeight is the height of the line including line spacing.
-//      $currentY += $this->lineHeight;
+      $y += $this->lineHeight;
 
     }
-
+    dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "text image memory");
     $this->imageResource = $image;
     return $image;
   }
@@ -246,13 +237,15 @@ class TextImageV3 {
 
     $name = $fileName.".png";
     $this->imageResource->writeImage($this->basePath.$name);
-
+    dblog("{$this->basePath}{$name}", "text image write to disk");
     return ["name" => $name, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
   }
 
   public function destroy() {
     $image = $this->imageResource;
-    $image->destroy();
+    $image->clear();
+    dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "text image memory after being destroyed");
+
   }
 
 }
