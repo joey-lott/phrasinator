@@ -33,15 +33,11 @@ class TestJob implements ShouldQueue
     public function handle()
     {
 
-      $log = new \App\DbLog();
-      $log->message = "test";
-      $log->context = "context";
-      $log->save();
-      //
-      // $this->basePath = getcwd()."/";
-      // dump($this->basePath);
-      //
-      // dblog($this->basePath, "test job output");
+
+      $this->basePath = getcwd()."/";
+      dump($this->basePath);
+
+      dblog($this->basePath, "test job output");
 
     }
 
