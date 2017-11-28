@@ -82,6 +82,11 @@ Route::get("subscribeStatus", function() {
 use App\RPL\TextImageV3;
 use App\RPL\Color;
 use App\RPL\CompositeImageV2;
+use App\Jobs\TestJob;
+
+Route::get("/dispatch-test", function() {
+    TestJob::dispatch()->onConnection("database");
+});
 
 Route::get("/test", function() {
   $phrase = "the good quick [[[color=ff2929]]]brown[[[/color]]] fox jumped over the lazy dog";
