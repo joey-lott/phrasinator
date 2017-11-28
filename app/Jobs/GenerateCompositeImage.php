@@ -70,6 +70,7 @@ class GenerateCompositeImage implements ShouldQueue
      */
     public function handle()
     {
+      dblog("GenerateCompositImage->handle()", "job queue");
 
       $this->basePath = getcwd()."/";
 

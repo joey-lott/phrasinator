@@ -236,6 +236,7 @@ class TextImageV3 {
     $image = $this->imageResource;
 
     $name = $fileName.".png";
+    dblog("{$this->basePath}{$name}", "text image temp file (attempt)");
     $this->imageResource->writeImage($this->basePath.$name);
     dblog("{$this->basePath}{$name}", "text image write to disk");
     return ["name" => $name, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
