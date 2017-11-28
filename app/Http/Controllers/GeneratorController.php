@@ -37,8 +37,8 @@ class GeneratorController extends Controller
 
       // This is the path to the temp directory
       //$imagePath = base_path()."/storage/app/temp/";
-      $imagePath = "temp/";
-      
+      $imagePath = "";
+
       $size = $request->size;
       $width = 3000;
       $height = 3000;
