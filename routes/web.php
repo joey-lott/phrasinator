@@ -108,7 +108,7 @@ Route::get("/test", function() {
                               $imageLocation, $pixabayImage, $lineSpacing,
                               $textJustification, $imagePath);
   $url = $g->handle();
-  return;
+  dd($url);
   $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification);
   $image->adjustFontToFillSpace();
   $resource = $image->generateImageResource();

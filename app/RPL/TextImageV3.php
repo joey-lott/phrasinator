@@ -47,42 +47,6 @@ class TextImageV3 {
     return substr(implode("-", $raw), 0, 50);
   }
 
-
-  public function createImageResourceForLineOfMarkup($lineOfMarkup, $height, $transparent, $baselineToTopOfText, $fontSizeMultiplier = 1) {
-
-    $image = imagecreatetruecolor($this->imageWidth, $height);
-    imagecolortransparent($image, $transparent);
-    imagefilledrectangle($image, 0, 0, $this->imageWidth, $height, $transparent);
-
-    // $red = imagecolorallocate($image, 254, 1, 1);
-    // imagefilledrectangle($image, 0, 0, $this->imageWidth, 10, $red);
-    // imagefilledrectangle($image, 0, $height - 10, $this->imageWidth, $height, $red);
-
-
-    $x = 0;
-    $height = 0;
-
-    for($i = 0; $i < count($lineOfMarkup); $i++) {
-      $markup = $lineOfMarkup[$i];
-      $color = $markup->color;
-
-      $imgColor = imagecolorallocate($image, $color->red, $color->green, $color->blue);
-
-      $printText = $markup->character;
-
-      // Use the negative of the color to turn off anti-aliasing. Otherwise,
-      // there can be some weird artifacts as a result of transparency
-      $bBox = imagettftext($image, $this->fontSize * $fontSizeMultiplier, 0, $x, $baselineToTopOfText, -$imgColor, base_path()."/fonts/".$this->font, $printText);
-
-      $x = $bBox[2];
-      // Get the character height
-      $charHeight = $bBox[1] - $bBox[5];
-      // If this is the max height, keep track
-      if($charHeight > $height) $height = $charHeight;
-    }
-    return ["image" => $image, "width" => $bBox[2], "height" => $height];
-  }
-
   private function generateLineWithAllCharacters() {
     $line = [];
     $charsString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?,'Ñ";
@@ -133,13 +97,10 @@ class TextImageV3 {
 
     $linesCount = count($layout->getLines());
     $totalHeight = ($height * (1 + ($this->verticalSpaceMultiplier))) * $linesCount;//($height * (1 + abs($this->verticalSpaceMultiplier))) * $linesCount;
-    // The print height should be less than the entire image height
-    // to prevent text getting cut off. This is a hack because some
-    // fonts report incorrect height.
     $printHeight = $this->imageHeight;
     if($totalHeight > $printHeight) {
       $this->fontSize *= $this->imageHeight / $totalHeight;
-      $this->fontSize = round($this->fontSize);
+      $this->fontSize = $this->fontSize;
     }
 
     $tallest = $this->generateLineWithAllCharacters();
@@ -229,9 +190,7 @@ class TextImageV3 {
     return $image;
   }
 
-  public function saveToDisk($name) {
-    // Now ignoring $name. Can refactor.
-    $fileName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
+  public function saveToDisk() {
 
     $image = $this->imageResource;
     $tmpPath = storage_path("temp_text.png");

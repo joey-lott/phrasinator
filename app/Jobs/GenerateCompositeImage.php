@@ -86,7 +86,7 @@ class GenerateCompositeImage implements ShouldQueue
 
 
       if($this->timeQueued == $latest->latestJobTime) {
-        $this->runImageCreation();
+        return $this->runImageCreation();
       }
     }
 
@@ -135,13 +135,13 @@ class GenerateCompositeImage implements ShouldQueue
       // Only need to do this for one of the composites since both will report the same
       $heightRemaining = $composite->fetchHeightRemaining();
 
-      ini_set('max_execution_time', 60);
+      ini_set('max_execution_time', 120);
 
       // Generate the text image
       $image = new TextImageV3($phrase, $fontName, $width, $heightRemaining, $color, $lineSpacing, $textJustification, $basePath);
       $image->adjustFontToFillSpace();
       $image->generateImageResource();
-      $imageData = $image->saveToDisk($this->userId."_tmp_text");
+      $imageData = $image->saveToDisk();
       $image->destroy();
 
       // Add the text images to the composite images. The language here is
@@ -156,6 +156,7 @@ class GenerateCompositeImage implements ShouldQueue
         $composite->addAbove($imageData);
       }
       $fileName = $image->getFileName();
+      dblog("attempting", "saving composite");
       $path = $composite->saveToDisk($fileName."".$fileNameUniqueSuffix, $this->userId);
       dblog($path, "saved composite");
       return ["path" => $path, "fileName" => $fileName];
