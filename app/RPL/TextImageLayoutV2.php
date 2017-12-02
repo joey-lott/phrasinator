@@ -196,10 +196,12 @@ class TextImageLayoutV2 {
   }
 
   public function getTotalDimensionsOfTextInOneLine($text) {
-    $box = imagettfbbox($this->fontSize, 0, $this->font, $text);
-    $width = $box[2] - $box[0];
-    $height = $box[1] - $box[5];
-    return [$width, $height];
+    $image = new \Imagick();
+    $draw = new \ImagickDraw();
+    $draw->setFont($this->font);
+    $draw->setFontSize( $this->fontSize );
+    $metrics = $image->queryFontMetrics($draw, $text);
+    return [$metrics["textWidth"], $metrics["textHeight"]];
   }
 
 }

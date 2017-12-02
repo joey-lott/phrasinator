@@ -78,7 +78,6 @@ Route::get("subscribeStatus", function() {
 //  dump(auth()->user()->onGracePeriodDefaultSubscription());
 });
 
-
 use App\RPL\TextImageV3;
 use App\RPL\Color;
 use App\RPL\CompositeImageV2;

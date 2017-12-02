@@ -30,6 +30,17 @@
                     </div>
                   </div>
                 -->
+
+
+      @foreach($fonts as $font)
+      <?php
+        if(isset($font->googleName)) {
+          $googleName = implode("+", explode(" ", $font->googleName));
+          echo '<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family='.$googleName.'" />';
+
+        }
+      ?>
+      @endforeach
       <form method="post" action="/generate">
         {{csrf_field()}}
         <div class="row form-group">
@@ -37,7 +48,19 @@
           <div class="col-md-10">
             <select name="fontName" id="fontName" class="form-control">
               @foreach($fonts as $font)
-                <option value="{{$font->file}}"<?php if($fontName == $font->file) echo " selected"; ?>>{{$font->label}}</option>
+                <?php
+                  if(isset($font->googleName)) {
+                    $googleName = implode("+", explode(" ", $font->googleName));
+                    echo '<option value="'.$font->file.'" style="font-family:\''.$font->googleName.'\'; font-size: 20px"';
+                    if($fontName == $font->file) echo " selected";
+                    echo '>'.$font->label.'</option>';
+                  }
+                  else {
+                    echo '<option value="'.$font->file.'"';
+                    if($fontName == $font->file) echo " selected";
+                    echo '>'.$font->label.'</option>';
+                  }
+                ?>
               @endforeach
             </select>
           </div>
