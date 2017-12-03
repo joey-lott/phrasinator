@@ -201,7 +201,9 @@ class TextImageLayoutV2 {
     $draw->setFont($this->font);
     $draw->setFontSize( $this->fontSize );
     $metrics = $image->queryFontMetrics($draw, $text);
-    return [$metrics["textWidth"], $metrics["textHeight"]];
+//    dump($metrics);
+    $height = $metrics["boundingBox"]["y2"] - $metrics["boundingBox"]["y1"];
+    return [$metrics["textWidth"], $height];//$metrics["textHeight"]];
   }
 
 }

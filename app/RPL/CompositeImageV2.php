@@ -80,7 +80,8 @@ class CompositeImageV2 {
     }
     $totalHeight -= $this->verticalSpacing;
 
-    $y = ($this->imageHeight - $totalHeight) / 2;
+    // Vertically center the image and add half the vertical spacing
+    $y = ($this->imageHeight - $totalHeight) / 2 + $this->verticalSpacing/2;
 
     foreach($this->images as $image) {
 
@@ -104,7 +105,9 @@ class CompositeImageV2 {
       // destroy it from memory
       $image->clear();
       dblog(($image->getResource(\imagick::RESOURCETYPE_MEMORY))/1000000, "retrieved temp image memory after being destroyed");
-      $y += $h + $this->verticalSpacing;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
+      // Add the height plus half the vertical spacing. The vertical spacing is split between
+      // the top of the image and the bottom to prevent the image being butted right up against the top
+      $y += $h + $this->verticalSpacing/2;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
 
     $name = $fileName.".png";
