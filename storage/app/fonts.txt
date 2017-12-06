@@ -17,4 +17,5 @@
 {"file":"specialelite.ttf","label":"typewriter ink","googleName":"Special Elite"},
 {"file":"shadowsintolight.ttf","label":"handwritten clean","googleName":"Shadows Into Light"},
 {"file":"jackport.ttf","label":"varsity"},
+{"file":"kgsketch.ttf","label":"sketch"},
 {"file":"federickathegreat.ttf","label":"sketch 2","googleName":"Fredericka the Great"}]
