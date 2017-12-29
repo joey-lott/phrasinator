@@ -18,6 +18,10 @@ use App\RPL\StraightOuttaImage;
 
 Route::get("/", function() { return redirect("/home");});
 
+Route::get('/authorize', "UserController@etsyAuthorize");
+Route::get('/authorize/complete', "UserController@completeAuthorization")->name('completeAuthorization');
+
+
 // Uncomment to use non-queued version
 //Route::post("/generate", "GeneratorController@generate");
 
@@ -25,6 +29,12 @@ Route::get("/", function() { return redirect("/home");});
 Route::post("/generate", "GeneratorController@generateQueuedImageJob");
 
 Route::get('/generate', "GeneratorController@form");
+
+Route::get('/generate/print', "PrintGeneratorController@form");
+Route::post("/generate/print", "PrintGeneratorController@generateQueuedImageJob");
+
+Route::get('/list', "ProductController@showForm");
+Route::post('/list', "ProductController@submit");
 
 Route::get('/straightoutta', function () {
   return "<html><body><form action='/straightoutta' method='post'>".csrf_field()."outta what? <input type='text' name='outta'><br>move it left? <input type='text' name='moveLeft' value='0'><br><button>MAKE IT</button></body></html>";

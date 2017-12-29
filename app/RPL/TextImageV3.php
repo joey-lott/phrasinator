@@ -97,7 +97,6 @@ class TextImageV3 {
     $totalHeight = $this->getTotalHeight();
     $printHeight = $this->imageHeight;
     if($totalHeight > $printHeight) {
-      dump("adjusting font size because of vertical overrun");
       $this->fontSize *= $this->imageHeight / $totalHeight;
       $this->fontSize = $this->fontSize;
     }
@@ -105,7 +104,6 @@ class TextImageV3 {
     $tallest = $this->generateLineWithAllCharacters();
     $string = $this->convertCharsToString($tallest);
     $metrics = $this->getMetricsForString($string);
-    dump($metrics);
     $this->setLineHeightForMetrics($metrics);
     // Now that the font is set, calculate the line height
 //    $height = $this->lineHeight * (count($this->layout->getLines()) - 1) + $this->lineTextHeight;
@@ -142,10 +140,8 @@ class TextImageV3 {
   }
 
   public function generateImageResource() {
-    dump("image height ".$this->imageHeight);
     // Adjust the height of the image to match the total height of the text
     $this->imageHeight = $this->getTotalHeight();
-    dump("image height ".$this->imageHeight);
 
     $image = new \Imagick();
     $image->newImage($this->imageWidth, $this->imageHeight, "none");
@@ -199,7 +195,6 @@ class TextImageV3 {
 
     $image = $this->imageResource;
     $tmpPath = storage_path("temp_text.png");
-    dump("writing temp text ".$tmpPath);
     $this->imageResource->writeImage($tmpPath);
 
     return ["name" => $tmpPath, "height" => $image->getImageHeight(), "width" => $image->getImageWidth()];
