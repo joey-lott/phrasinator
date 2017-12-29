@@ -32,7 +32,7 @@ class CardMockup {
     // If the path doesn't exist, create it first.
     Storage::makeDirectory($path);
 
-    $mockupPath = storage_path("etsy-card-background.png");
+    $mockupPath = storage_path("app/etsy-card-background.png");
     $compositeImage = new \Imagick();
     $compositeImage->newImage($this->imageWidth, $this->imageHeight, "none");
 
