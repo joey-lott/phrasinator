@@ -13,6 +13,7 @@ use App\Etsy\Models\PropertyValue;
 use App\Etsy\Models\ListingStagingData;
 use App\Listed;
 use App\ImagePaths;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -25,11 +26,11 @@ class ProductController extends Controller
 
     public function showForm() {
       $paths = ImagePaths::where("userId", auth()->user()->id)->get()->all();
-
+      $description = Storage::disk("local")->get("description.txt");
       $image = $paths[2]->imagePath.$paths[2]->imageName;
       $taxonomyId = 1265; // paper_and_party_supplies.paper.greeting_cards.blank_cards
       $price = 3;
-      return view("productForm", ["image" => $image, "taxonomyId" => $taxonomyId, "price" => $price]);
+      return view("productForm", ["image" => $image, "taxonomyId" => $taxonomyId, "price" => $price, "description" => $description]);
     }
 
     public function submit(Request $request) {

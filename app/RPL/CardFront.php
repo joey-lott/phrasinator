@@ -20,8 +20,9 @@ class CardFront {
   private $backgroundColor;
   private $designWidth;
   private $designHeight;
+  private $backgroundImage;
 
-  public function __construct($width = 1500, $height = 2100, $uniqueId = "", $basePath = "", $border = true, $borderColor = "FF0000", $borderWidth = 20, $backgroundColor = "FFFFFF") {
+  public function __construct($width = 1500, $height = 2100, $uniqueId = "", $basePath = "", $border = true, $borderColor = "FF0000", $borderWidth = 20, $backgroundColor = "FFFFFF", $backgroundImage = "none") {
     $this->imageWidth = $width;
     $this->imageHeight = $height;
 
@@ -31,7 +32,7 @@ class CardFront {
     $this->borderColor = "#".$borderColor;
     $this->backgroundColor = "#".$backgroundColor;
     $this->borderWidth = $borderWidth;
-
+    $this->backgroundImage = $backgroundImage;
     // Adjust the vertical spacing relative to the height
     $this->verticalSpacing *= ($height / 2100);
 
@@ -87,6 +88,11 @@ class CardFront {
 
     $compositeImage = new \Imagick();
     $compositeImage->newImage($this->imageWidth, $this->imageHeight, new \ImagickPixel($this->backgroundColor));
+
+    if($this->backgroundImage != "none") {
+      $image = new \Imagick(storage_path("app/".$this->backgroundImage));
+      $compositeImage->compositeImage($image, \imagick::COMPOSITE_DEFAULT, 0, 0);
+    }
 
     if($this->border) {
       $draw = new \ImagickDraw();

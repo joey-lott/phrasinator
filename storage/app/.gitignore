@@ -2,3 +2,5 @@
 !public/
 !.gitignore
 !*.txt
+!backgrounds/
+!description.txt

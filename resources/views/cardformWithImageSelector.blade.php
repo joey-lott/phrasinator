@@ -120,6 +120,25 @@
         </div>
 
         <div class="row form-group">
+          <label class="form-group col-md-2">Background Color:</label>
+          <div class="col-md-10">
+            <input class="jscolor" name="backgroundColor" value="{{$backgroundColor}}">
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <label class="form-group col-md-2">Background Image:</label>
+          <div class="col-md-10">
+            <select name="backgroundImage" class="form-control">
+              <option>none</option>
+              @foreach($backgrounds as $bg)
+                <option @if($backgroundImage == $bg) selected @endif>{{$bg}}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+
+        <div class="row form-group">
           <label class="form-group col-md-2">Pixabay Image Location:</label>
           <div class="col-md-10">
             <select name="imageLocation" id="imageLocation" class="form-control">

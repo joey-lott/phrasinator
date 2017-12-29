@@ -35,10 +35,12 @@ class GenerateCardImage implements ShouldQueue
     private $border;
     private $borderColor;
     private $borderWidth;
+    private $backgroundImage;
+    private $backgroundColor;
 
     public function __construct($userId, $width, $height, $phrase, $fontName,
                                 $imageLocation, $pixabayImage, $lineSpacing,
-                                $textJustification, $basePath, $border, $borderColor, $borderWidth)
+                                $textJustification, $basePath, $border, $borderColor, $borderWidth, $backgroundImage, $backgroundColor)
     {
       $this->userId = $userId;
       $this->width = $width;
@@ -52,6 +54,8 @@ class GenerateCardImage implements ShouldQueue
       $this->border = $border;
       $this->borderColor = $borderColor;
       $this->borderWidth = $borderWidth;
+      $this->backgroundImage = $backgroundImage;
+      $this->backgroundColor = $backgroundColor;
 
       // This wasn't working on fortrabbit. It worked locally, so there's
       // a difference between how jobs are run locally versus on forrabbit
@@ -106,8 +110,7 @@ class GenerateCardImage implements ShouldQueue
     private function runImageCreation() {
 
 //      $width =
-
-      $front = $this->makeFront(3000, 2100, $this->phrase, $this->fontName, $this->imageLocation, $this->pixabayImage, "", new Color("000000"), $this->lineSpacing, $this->textJustification, $this->basePath, $this->border, $this->borderColor, $this->borderWidth);
+      $front = $this->makeFront(3000, 2100, $this->phrase, $this->fontName, $this->imageLocation, $this->pixabayImage, $this->backgroundColor, new Color("000000"), $this->lineSpacing, $this->textJustification, $this->basePath, $this->border, $this->borderColor, $this->borderWidth, $this->backgroundImage, $this->backgroundColor);
       $frontPath = $front["tempPath"];
       $frontUrl = $front["url"];
       $filename = $front["filename"];
@@ -138,8 +141,9 @@ class GenerateCardImage implements ShouldQueue
       return $card5x7parts["path"];
     }
 
-    private function makeFront($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $filenameUniqueSuffix, $color, $lineSpacing, $textJustification, $basePath) {
-      $composite = new CardFront($width/2, $height, $this->userId, $basePath, $this->border, $this->borderColor, $this->borderWidth);
+    private function makeFront($width, $height, $phrase, $fontName, $imageLocation, $pixabayImage, $filenameUniqueSuffix, $color, $lineSpacing, $textJustification, $basePath, $border, $borderColor, $borderWidth, $backgroundImage, $backgroundColor) {
+
+      $composite = new CardFront($width/2, $height, $this->userId, $basePath, $this->border, $this->borderColor, $this->borderWidth, $backgroundColor, $backgroundImage);
 
       // If image location was set to above or below (not none), try to grab the image
       if($imageLocation == "above" || $imageLocation == "below") {

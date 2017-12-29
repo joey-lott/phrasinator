@@ -60,11 +60,14 @@ class PrintGeneratorController extends Controller
                "textJustification" => $request->textJustification,
                "border" => $request->border,
                "borderWidth" => $request->borderWidth,
-               "borderColor" => $request->borderColor]);
+               "borderColor" => $request->borderColor,
+               "backgroundColor" => $request->backgroundColor,
+               "backgroundImage" => $request->backgroundImage]);
 
 
       ImagePaths::where("userId", $userId)->delete();
-      GenerateCardImage::dispatch($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath, $request->border, $request->borderColor, $request->borderWidth);
+
+      GenerateCardImage::dispatch($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath, $request->border, $request->borderColor, $request->borderWidth, $request->backgroundImage, $request->backgroundColor);
       // $job = new GenerateCompositeImage($userId, $width, $height, $request->phrase, $request->fontName, $request->imageLocation, $request->pixabayImage, $request->lineSpacing, $request->textJustification, $imagePath);
       // $job->handle();
       return view("displaycardqueued", ["userId" => $userId]);
@@ -194,6 +197,9 @@ class PrintGeneratorController extends Controller
         session()->forget("border");
         session()->forget("borderColor");
         session()->forget("borderWidth");
+        session()->forget("backgroundColor");
+        session()->forget("backgroundImage");
+
       }
 
       // If there is session data, use it to populate the form.
@@ -207,7 +213,11 @@ class PrintGeneratorController extends Controller
       $border = session()->has("border") ? session()->get("border") : null;
       $borderWidth = session()->has("borderWidth") ? session()->get("borderWidth") : 0;
       $borderColor = session()->has("borderColor") ? session()->get("borderColor") : "FFFFFF";
+      $backgroundColor = session()->has("backgroundColor") ? session()->get("backgroundColor") : "FFFFFF";
+      $backgroundImage = session()->has("backgroundImage") ? session()->get("backgroundImage") : "none";
       $showExtras = !auth()->user()->onBasicPlan();
+
+      $backgrounds = Storage::disk("local")->files("backgrounds");
 
       return view("cardformWithImageSelector", ["phrase" => $phrase, "fontName" => $fontName, "size" => $size,
       "imageLocation" => $imageLocation,
@@ -219,7 +229,10 @@ class PrintGeneratorController extends Controller
       "border" => $border,
       "borderColor" => $borderColor,
       "borderWidth" => $borderWidth,
-      "userId" => auth()->user()->id]);
+      "userId" => auth()->user()->id,
+      "backgrounds" => $backgrounds,
+      "backgroundColor" => $backgroundColor,
+      "backgroundImage" => $backgroundImage]);
     }
 
 }

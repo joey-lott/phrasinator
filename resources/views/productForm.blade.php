@@ -26,7 +26,7 @@
                   <div class="form-group row">
                     <label class="col-sm-2">Tags:</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" name="tags" value="">
+                      <input type="text" class="form-control" name="tags" id="tags" value="">
                     </div>
                   </div>
 
@@ -40,7 +40,7 @@
                   <div class="row">
                     <label class="col-sm-2">Description:</label>
                     <div class="col-sm-10">
-                      <textarea name="description" class="form-control" rows="20" id="description"></textarea>
+                      <textarea name="description" class="form-control" rows="20" id="description">{{$description}}</textarea>
                     </div>
                   </div>
                     <div class="row">
@@ -75,6 +75,41 @@
       btn.disabled = false;
     }
     titleChars.value = title.length;
+    var tags = [];
+    tagsInput = document.getElementById("tags");
+    phrases = title.split(" - ");
+    for(var i = 0; i < phrases.length; i++) {
+      tags.push(validateTag(phrases[i]));
+    }
+    words = title.split(" ");
+    for(var i = 0; i < words.length; i++) {
+      word = words[i];
+      if(word == "-") continue;
+      tags.push(validateTag(word));
+    }
+    tags = filterUnique(tags);
+    tagsInput.value = tags.join(",");
+  }
+
+  function filterUnique(t) {
+    var keys = {};
+    var unique = [];
+    for(var i = 0; i < t.length; i++) {
+      console.log(t[i]);
+      if(keys.hasOwnProperty(t[i]) || t[i] == "") continue;
+      keys[t[i]] = true;
+      unique.push(t[i]);
+    }
+    return unique;
+  }
+
+  function validateTag(tag) {
+    if(tag.length <= 20) {
+      return tag;
+    }
+    parts = tag.split(" ");
+    parts.pop();
+    return validateTag(parts.join(" "));
   }
 </script>
 @endsection
