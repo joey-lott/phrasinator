@@ -32,7 +32,7 @@ class CardImage {
     // If the path doesn't exist, create it first.
     Storage::makeDirectory($path);
 
-    $padding = 100;
+    $padding = 150;
 
     $totalWidth = $this->imageWidth + $padding * 2;
     $totalHeight = $this->imageHeight + $padding * 2;

@@ -95,10 +95,10 @@
     var keys = {};
     var unique = [];
     for(var i = 0; i < t.length; i++) {
-      console.log(t[i]);
       if(keys.hasOwnProperty(t[i]) || t[i] == "") continue;
       keys[t[i]] = true;
       unique.push(t[i]);
+      if(unique.length == 13) return unique;
     }
     return unique;
   }

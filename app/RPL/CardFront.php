@@ -145,11 +145,11 @@ class CardFront {
       $y += $h + $this->verticalSpacing/2;// + ($this->imageHeight * $this->verticalSpaceMultiplier);
     }
 
-    $name = $fileName.".png";
+    $name = $fileName.".jpg";
 
     $tmpPath = $this->basePath;
-    $compositeImage->setImageFormat("png");
-
+    $compositeImage->setImageFormat("jpg");
+    $compositeImage->setColorspace(\imagick::COLORSPACE_CMYK);
     // Save a temp file to use in composites.
     $path = $this->saveImageToDisk($compositeImage);
 
