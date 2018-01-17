@@ -33,6 +33,10 @@ Route::get('/generate', "GeneratorController@form");
 Route::get('/generate/print', "PrintGeneratorController@form");
 Route::post("/generate/print", "PrintGeneratorController@generateQueuedImageJob");
 
+Route::get('/image/upload', "UploadImageController@form");
+Route::post('/image/upload', "UploadImageController@upload");
+
+
 Route::get('/list', "ProductController@showForm");
 Route::post('/list', "ProductController@submit");
 

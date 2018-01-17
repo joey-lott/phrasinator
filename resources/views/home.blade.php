@@ -15,6 +15,7 @@
 
                 <div class="panel-body">
                   <a href="/generate">IMAGE GENERATOR</a><br><br>
+                  <a href="/image/upload">IMAGE UPLOAD</a><br><br>
                   <a href="/generate/print">PRINT IMAGE GENERATOR</a>
                 </div>
             </div>

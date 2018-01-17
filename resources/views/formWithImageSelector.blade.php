@@ -119,11 +119,14 @@
 
         <div class="row form-group">
           <label class="form-group col-md-2">Search Pixabay:</label>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <input type="text" id="pixabayKeyword" class="form-control">
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <button class="btn btn-default" onclick="runPixabaySearch(event);">Search Pixabay</button>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-default" onclick="runUploadedImagesSearch(event);">Uploaded Images</button>
           </div>
           <label class="form-group col-md-2">Only Vectors?:</label>
           <div class="col-md-1">
@@ -250,6 +253,28 @@ function handleImagePathResults(response) {
       wfurl = wfurlParts[0]+"_960."+fileExtension;
 
       $("#images").append("<input type='radio' id='image"+i+"' name='pixabayImage' onchange='imageSelectionChange(this);' value='"+wfurl+"' style='visibility:hidden;position:absolute'><label for='image"+i+"' id='image"+i+"_label' style='border: 2px solid transparent'><img src='"+hits[i].previewURL+"'></label>");
+    }
+  }
+
+  function runUploadedImagesSearch(event) {
+    event.preventDefault();
+    fetchUploadedImages();
+    return false;
+  }
+
+  function fetchUploadedImages() {
+    url = "/api/uploaded-images/{{auth()->user()->id}}";
+    $.get(url, handleUploadedImageResults);
+  }
+
+  function handleUploadedImageResults(response) {
+    $("#images").empty();
+    hits = response;
+    for(i = 0; i < response.length; i++) {
+
+      let wfurl = response[i].url;
+
+      $("#images").append("<input type='radio' id='image"+i+"' name='pixabayImage' onchange='imageSelectionChange(this);' value='"+wfurl+"' style='visibility:hidden;position:absolute'><label for='image"+i+"' id='image"+i+"_label' style='border: 2px solid transparent'><img src='"+wfurl+"' width='200'></label>");
     }
   }
 
