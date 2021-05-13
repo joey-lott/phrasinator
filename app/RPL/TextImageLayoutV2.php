@@ -104,6 +104,7 @@ class TextImageLayoutV2 {
     // how many units if the whole thing is on a square grid.
     $unitsPerLine = sqrt($numberOfUnits);
 
+
     // The width per line is the maximum width per line of text. Each line
     // of text may be less than this, of course. And in some cases, if there is
     // a very long word, text can overrun this. But this value gives the guideline

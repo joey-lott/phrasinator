@@ -43,6 +43,7 @@ class CardFront {
   }
 
   public function fetchFromUrl($url) {
+    dump($url);
     $handle = fopen($url, 'rb');
     $image = new \Imagick();
     $image->readImageFile($handle);

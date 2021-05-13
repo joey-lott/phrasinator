@@ -274,12 +274,12 @@ function handleImagePathResults(response) {
     hits = response.hits;
     $("#images").empty();
     for(i = 0; i < hits.length; i++) {
-
+console.log(hits[i]);
       // Pixabay returns 640 images, but allows up to 960. So swap 640 out with 960 in the returned URLs
-      let wfurl = hits[i].webformatURL;
-      let wfurlParts = wfurl.split("_");
-      let fileExtension = wfurlParts[1].split(".")[1];
-      wfurl = wfurlParts[0]+"_960."+fileExtension;
+      let wfurl = hits[i].largeImageURL;
+      //let wfurlParts = wfurl.split("_");
+      //let fileExtension = wfurlParts[1].split(".")[1];
+      //wfurl = wfurlParts[0]+"_960."+fileExtension;
 
       $("#images").append("<input type='radio' id='image"+i+"' name='pixabayImage' onchange='imageSelectionChange(this);' value='"+wfurl+"' style='visibility:hidden;position:absolute'><label for='image"+i+"' id='image"+i+"_label' style='border: 2px solid transparent'><img src='"+hits[i].previewURL+"'></label>");
     }

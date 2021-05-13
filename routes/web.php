@@ -80,17 +80,6 @@ Route::get("/log-view", function() {
   echo "</ul>";
 });
 
-Route::get("subscribeStatus", function() {
-  dd(AppSecrets::get("AWS_ACCESS_KEY_ID"));
-//  $options = SubscriptionOptions::getOptions();
-//dump(auth()->user()->subscribed("phrasinator-basic-monthly"));
-  dump(auth()->user()->getCurrentSubscription());
-  // dump(auth()->user()->hasCardOnFile());
-  //dump(auth()->user()->onTrial("phrasinator-basic-monthly"));
-  // dump(auth()->user()->upcomingInvoice());
-  // dump(auth()->user()->defaultCard());
-//  dump(auth()->user()->onGracePeriodDefaultSubscription());
-});
 
 use App\RPL\TextImageV3;
 use App\RPL\Color;

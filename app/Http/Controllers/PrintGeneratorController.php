@@ -20,11 +20,10 @@ class PrintGeneratorController extends Controller
     public function __construct()
     {
         $this->middleware('auth')->except("generatePreview");
-        $this->middleware('subscribed')->except("generatePreview");
+        //$this->middleware('subscribed')->except("generatePreview");
     }
 
     public function generateQueuedImageJob(Request $request) {
-
       $userId = auth()->user()->id;
 
       // Delete all the paths from previous jobs.
@@ -50,6 +49,9 @@ class PrintGeneratorController extends Controller
         $width = 1500;
         $height = 1500;
       }
+
+
+dump($request->pixabayImage);
 
       session(["phrase" => $request->phrase,
                "fontName" => $request->fontName,
@@ -218,7 +220,6 @@ class PrintGeneratorController extends Controller
       $showExtras = !auth()->user()->onBasicPlan();
 
       $backgrounds = Storage::disk("local")->files("backgrounds");
-
       return view("cardformWithImageSelector", ["phrase" => $phrase, "fontName" => $fontName, "size" => $size,
       "imageLocation" => $imageLocation,
       "imageUrl" => $imageUrl,

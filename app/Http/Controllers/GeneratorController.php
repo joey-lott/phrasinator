@@ -24,6 +24,7 @@ class GeneratorController extends Controller
     }
 
     public function generateQueuedImageJob(Request $request) {
+      
 
       $userId = auth()->user()->id;
 

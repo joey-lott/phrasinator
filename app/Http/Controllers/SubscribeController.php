@@ -12,9 +12,10 @@ class SubscribeController extends Controller
     //
     public function __construct()
     {
-        $this->middleware('auth');
+        /*$this->middleware('auth');
         $this->middleware('not.subscribed')->only(["subscribe", "showPaymentForm"]);
         $this->middleware('subscribed')->except(["subscribe", "showPaymentForm"]);
+        */
     }
 
     public function showPaymentForm() {

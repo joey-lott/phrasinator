@@ -12,13 +12,19 @@ class AppSecrets {
   }
 
   public function getSecret($key) {
-    return $this->secrets["CUSTOM"][$key];
+    if(isset($this->secrets["CUSTOM"][$key])) {
+      return $this->secrets["CUSTOM"][$key];
+    }
+    else {      
+       return false;
+    }
   }
 
   static public function get($key) {
     $as = new AppSecrets();
     $as->getSecrets();
     $secret = $as->getSecret($key);
+    if(!$secret) $secret = env($key);
     return $secret;
   }
 

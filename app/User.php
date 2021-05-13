@@ -35,6 +35,7 @@ class User extends Authenticatable
     }
 
     public function getCurrentStripePlanName() {
+      return "super";
       return $this->getCurrentSubscription()->stripe_plan;
     }
 
@@ -47,6 +48,7 @@ class User extends Authenticatable
     }
 
     public function onBasicPlan() {
+      return false;
       return strpos($this->getCurrentStripePlanName(), "basic") !== false;
     }
 
